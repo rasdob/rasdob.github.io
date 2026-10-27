@@ -1,6 +1,6 @@
 import {identity,multiply,transform,point,vector,normalize,cross,dot,sub,forwardKinematics,solveRightArm,sceneFrame,planarPosition} from './robot-kinematics.mjs';
 
-const MODEL_URL=new URL('./assets/astribot/model.json',import.meta.url);
+const MODEL_URL=new URL('./assets/astribot/model.json?v=20261027model1',import.meta.url);
 let sharedAssets;
 let assetProgress={phase:'metadata',loaded:0,total:1,ratio:0};
 const progressListeners=new Set();
@@ -56,7 +56,18 @@ async function loadAssets(onProgress,signal){
     const geometryRequest=(async()=>{
       const data=await fetch(new URL(model.binary,MODEL_URL),{signal:requestController.signal});
       if(!data.ok)throw new Error('Astribot meshes could not be loaded.');
-      const binary=await readGeometry(data,model.byteLength);geometryDone=true;
+      const compressed=model.compression==='gzip';
+      if(model.compression&&!compressed)throw new Error('Unsupported Astribot mesh compression.');
+      const downloadBytes=compressed?model.downloadBytes:model.byteLength;
+      if(!Number.isSafeInteger(downloadBytes)||downloadBytes<=0)throw new Error('Invalid Astribot download size.');
+      let binary=await readGeometry(data,downloadBytes);
+      if(compressed){
+        if(typeof DecompressionStream!=='function')throw new Error('This browser cannot decode the Astribot model.');
+        const stream=new Blob([binary]).stream().pipeThrough(new DecompressionStream('gzip'));
+        binary=await new Response(stream).arrayBuffer();
+        if(binary.byteLength!==model.byteLength)throw new Error('Incomplete Astribot mesh file.');
+      }
+      geometryDone=true;
       updateAssetProgress('textures',decoded,paths.length);return binary;
     })();
     // Both are CPU assets. No GPU upload can outlive a failed sibling request.
