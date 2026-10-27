@@ -1,4 +1,4 @@
-import {t} from './i18n.mjs?v=20261027corners1';
+import {t} from './i18n.mjs?v=20261027marker1';
 // A three-dimensional pinhole scene, drawn with Canvas so the lesson also works
 // when WebGL is unavailable. Units and trajectories are illustrative.
 export const RECONSTRUCTION_DURATION=24;

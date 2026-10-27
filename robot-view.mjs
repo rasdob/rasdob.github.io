@@ -1,6 +1,7 @@
 import {identity,multiply,transform,point,vector,normalize,cross,dot,sub,forwardKinematics,solveRightArm,sceneFrame,planarPosition} from './robot-kinematics.mjs';
+import {MARKER_SIDE,DEPTH} from './engine.mjs?v=20261027marker1';
 
-const MODEL_URL=new URL('./assets/astribot/model.json?v=20261027corners1',import.meta.url);
+const MODEL_URL=new URL('./assets/astribot/model.json?v=20261027marker1',import.meta.url);
 let sharedAssets;
 let assetProgress={phase:'metadata',loaded:0,total:1,ratio:0};
 const progressListeners=new Set();
@@ -158,10 +159,10 @@ function cubeVertices(){const out=[];for(let axis=0;axis<3;axis++)for(const sign
 function diskVertices(){const out=[];for(let i=0;i<64;i++){for(const angle of [null,i*Math.PI/32,(i+1)*Math.PI/32])out.push(...(angle===null?[0,0,0]:[Math.cos(angle),Math.sin(angle),0]),0,0,1,1,1,1);}return new Float32Array(out);}
 function quadVertices(){return new Float32Array([-1,-1,0,0,0,1,1,1,1,1,-1,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,-1,-1,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,-1,1,0,0,0,1,1,1,1]);}
 function markerVertices(){
-  // Bake the unchanged two-sided fiducial once, rather than drawing each cell.
-  const cube=cubeVertices(),out=[],bits=['111111','100101','110001','101101','100011','111111'];
+  // Match the image marker's size and white border on both sides of the plate.
+  const cube=cubeVertices(),out=[],cell=MARKER_SIDE*.82/6,bits=['111111','100101','110001','101101','100011','111111'];
   for(let y=0;y<6;y++)for(let x=0;x<6;x++)if(bits[y][x]==='1')for(const side of [-1,1]){
-    for(let v=0;v<cube.length;v+=9)out.push(cube[v]*.0142+(x-2.5)*.014,cube[v+1]*.0142+(2.5-y)*.014,cube[v+2]*.0006+side*.0032,...cube.subarray(v+3,v+9));
+    for(let v=0;v<cube.length;v+=9)out.push(cube[v]*cell*1.01+(x-2.5)*cell,cube[v+1]*cell*1.01+(2.5-y)*cell,cube[v+2]*.0006+side*.0032,...cube.subarray(v+3,v+9));
   }
   return new Float32Array(out);
 }
@@ -251,15 +252,15 @@ export async function createRobotView(canvas,{interactive=true,variant='hero',on
     const cameraWorld=fk.camera;
     draw(cube,36,scaled(multiply(cameraWorld,transform([0,0,.007])),[.08,.028,.024]),[.50,.56,.62]);
     for(const x of [-.025,.025])draw(cube,36,scaled(multiply(cameraWorld,transform([x,0,-.006])),[.014,.014,.003]),[.035,.06,.1]);
-    const targetWorld=planarPosition(frame,target,.58),back=frame.forward.map(x=>-x),markerBasis=basisMatrix(targetWorld,frame.right,frame.up,back);
-    draw(cube,36,scaled(markerBasis,[.116,.116,.006]),[.99,.99,.99]);
+    const targetWorld=planarPosition(frame,target,DEPTH),back=frame.forward.map(x=>-x),markerBasis=basisMatrix(targetWorld,frame.right,frame.up,back);
+    draw(cube,36,scaled(markerBasis,[MARKER_SIDE,MARKER_SIDE,.006]),[.99,.99,.99]);
     // A conceptual fiducial pattern, not an ArUco dictionary claim.
     draw(marker,markerData.length/9,markerBasis,[.035,.055,.085],1,1);
-    const camPos=point(cameraWorld),corners=[[-.055,-.055],[.055,-.055],[.055,.055],[-.055,.055]].map(p=>targetWorld.map((v,i)=>v+frame.right[i]*p[0]+frame.up[i]*p[1]));
+    const camPos=point(cameraWorld),half=MARKER_SIDE/2,corners=[[-half,-half],[half,-half],[half,half],[-half,half]].map(p=>targetWorld.map((v,i)=>v+frame.right[i]*p[0]+frame.up[i]*p[1]));
     const rays=[];for(let i=0;i<4;i++)rays.push(camPos,corners[i],corners[i],corners[(i+1)%4]);gl.depthMask(false);drawLines(rays,[.3,.51,.93],.2);gl.depthMask(true);
     for(const candidate of (state.candidates||[]).slice(0,6)){
       const pts=candidate.points||candidate;if(!Array.isArray(pts)||pts.length<2)continue;
-      const segments=[];for(let i=1;i<pts.length;i++)if(Array.isArray(pts[i])&&Array.isArray(pts[i-1]))segments.push(planarPosition(frame,pts[i-1],.58),planarPosition(frame,pts[i],.58));
+      const segments=[];for(let i=1;i<pts.length;i++)if(Array.isArray(pts[i])&&Array.isArray(pts[i-1]))segments.push(planarPosition(frame,pts[i-1],DEPTH),planarPosition(frame,pts[i],DEPTH));
       drawLines(segments,[.24,.53,.93],.25);
     }
     return true;

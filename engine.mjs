@@ -6,7 +6,7 @@ export const FOCAL = 480;
 export const DEPTH = 0.58;
 export const SCALE = FOCAL / DEPTH;
 export const SIZE = [640, 360];
-export const MARKER_SIDE = 0.11;
+export const MARKER_SIDE = 0.16;
 export const DEFAULTS = Object.freeze({mode:'estimate', motion:'circle', method:'ra', frequency:0.40, speed:0.07, radius:0.04, noise:0.35, history:0.75, sigma:0.25, gain:10, tau:0.18, plantGain:0.8, horizon:12, seed:13, counts:[100,100,93,100], weighting:'grouped', duration:24});
 export const clamp = (x,a,b) => Math.max(a,Math.min(b,x));
 export const norm = a => Math.hypot(...a);
