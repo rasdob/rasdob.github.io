@@ -1,4 +1,4 @@
-import {Simulation} from './engine.mjs?v=20261027marker1';
+import {Simulation} from './engine.mjs?v=20261027compact1';
 self.onmessage=event=>{
   const {config,window}=event.data,methods=['mpc','sdob','ra'],results=[];
   try{

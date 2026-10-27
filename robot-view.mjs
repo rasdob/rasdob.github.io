@@ -1,7 +1,8 @@
 import {identity,multiply,transform,point,vector,normalize,cross,dot,sub,forwardKinematics,solveRightArm,sceneFrame,planarPosition} from './robot-kinematics.mjs';
-import {MARKER_SIDE,DEPTH} from './engine.mjs?v=20261027marker1';
+import {decodeModelGeometry} from './model-codec.mjs?v=20261027compact1';
+import {MARKER_SIDE,DEPTH} from './engine.mjs?v=20261027compact1';
 
-const MODEL_URL=new URL('./assets/astribot/model.json?v=20261027marker1',import.meta.url);
+const MODEL_URL=new URL('./assets/astribot/model.json?v=20261027compact1',import.meta.url);
 let sharedAssets;
 let assetProgress={phase:'metadata',loaded:0,total:1,ratio:0};
 const progressListeners=new Set();
@@ -44,7 +45,7 @@ async function loadAssets(onProgress,signal){
     updateAssetProgress('metadata',0,1);
     const response=await fetch(MODEL_URL);if(!response.ok)throw new Error('Astribot model could not be loaded.');
     const model=await response.json();
-    if(model.format!==2||model.vertexStride!==11)throw new Error('Robot assets need to be updated; reload the page.');
+    if(![2,3].includes(model.format)||model.vertexStride!==11)throw new Error('Robot assets need to be updated; reload the page.');
     if(!Number.isSafeInteger(model.byteLength)||model.byteLength<=0)throw new Error('Invalid Astribot mesh file size.');
     updateAssetProgress('metadata',1,1);
     const paths=[...new Set(model.meshes.map(mesh=>mesh.texture).filter(Boolean))],requestController=new AbortController();
@@ -68,6 +69,7 @@ async function loadAssets(onProgress,signal){
         binary=await new Response(stream).arrayBuffer();
         if(binary.byteLength!==model.byteLength)throw new Error('Incomplete Astribot mesh file.');
       }
+      binary=decodeModelGeometry(model,binary);
       geometryDone=true;
       updateAssetProgress('textures',decoded,paths.length);return binary;
     })();

@@ -15,15 +15,17 @@ Copyright 2025 Astribot; Apache License 2.0. See `LICENSE.txt` and `ATTRIBUTION.
 
 ## Local asset format
 
-`model.json` has `format: 2` and `vertexStride: 11`. `model.bin.gz` is a losslessly gzip-compressed buffer of 11 little-endian floats per vertex: position (3), normal (3), material colour (3), UV (2). Every part has at most 65,535 vertices and local Uint16 triangle indices; a source mesh may be split into several parts. Each `geom` references one part and keeps the source body/geometry transform.
+`model.json` has `format: 3`, `storageVertexBytes: 16` and `vertexStride: 11`. The gzip transport stores each vertex as three unsigned 16-bit position components, three signed 16-bit normal components and two unsigned 16-bit UV components. Positions and UVs use bounds stored per mesh. Constant material colors are stored once per mesh. Uint16 triangle indices are unchanged.
 
-The mesh entries include a relative `texture` path or null, and material `metallic`/`roughness`. Textured vertices have a white colour multiplier. UV seams and 35-degree hard normal edges are preserved. The UV V coordinate is flipped once, matching the paper's Blender script. The browser uploads PNGs with `UNPACK_FLIP_Y_WEBGL=true` to match image orientation; it must not flip the UV a second time.
+The browser expands these values into the existing 11-float WebGL layout: position (3), normal (3), material color (3), UV (2). Each part has at most 65,535 vertices. Geometry/body transforms, joint axes, limits and wrist-camera mounting are unchanged.
 
-The four texture files are copied byte-for-byte. Dense surfaces are retriangulated with topology-preserving vertex deletion inside UV and normal seams. Retained vertices keep source positions, UVs and smooth normals. Small head/wrist/gripper meshes remain intact; the head receives a larger detail budget. Original Blender/paper inputs remain unchanged.
+Dense surfaces were retriangulated within UV and normal seams, retaining source vertices before transport quantization. This second compression keeps all 279,660 triangles and all four original PNG textures. Maximum position error from quantization is 6.78 micrometers, normal angular error is below 0.00151 degrees, and UV error is below 0.00000764. Four offline views have silhouette IoU at least 0.999986 compared with the previous web model. Original Blender/paper inputs remain unchanged.
 
-The result contains 279,660 unique-mesh triangles, down from 1,054,813. The decoded geometry is 14.82 MB, delivered as a 7.69 MB gzip file. Including original textures and metadata, model resources total about 9.1 MB instead of 50.7 MB. The browser uses native `DecompressionStream` before GPU upload and validates both download and decoded sizes. Browsers without the decoder use the existing photo fallback; the numerical simulation remains available. All files load locally; no CDN is required.
+Geometry download size is **4.52 MB**, down from **7.69 MB**. Including textures and metadata, model resources total about **5.97 MB**, down from **9.12 MB**. Gzip expands to 6.46 MB of compact transport, then 14.82 MB of GPU vertex/index data. This reduces transfer size; it does not reduce triangle count or GPU buffer size. The browser uses native `DecompressionStream`, followed by the local `model-codec.mjs` decoder. No CDN or new dependency is required.
 
-`byteLength` and `sha256` describe the decoded buffer; `downloadBytes` describes the compressed file. The binary URL includes a content hash to avoid combining stale geometry with new metadata.
+`byteLength` and `sha256` describe the compact transport after gzip decompression. `decodedByteLength` and `decodedSha256` describe the expanded WebGL buffer. `downloadBytes` describes the gzip file. Its URL includes the transport content hash to avoid combining stale geometry with new metadata. The decoder also supports earlier format 2 assets.
+
+UV V is flipped once, matching the paper's Blender script. Texture upload uses `UNPACK_FLIP_Y_WEBGL=true`; the decoder must not flip UV again. PNGs are copied byte-for-byte. Browsers without WebGL or gzip decoding use the existing photo fallback; numerical simulation remains available.
 
 Recreate from the repository root:
 
@@ -31,7 +33,7 @@ Recreate from the repository root:
 .venv/bin/python sites/ra-sdob-explained/scripts/export_astribot_model.py
 ```
 
-The exporter uses existing MuJoCo, NumPy, SciPy and VTK installations. It does not require or launch Blender. The exporter checks every retained textured position/UV pair against the source. Tests check original texture hashes, packed LOD geometry, gzip loading and corruption handling, finite normals, joint kinematics and screen framing. `scripts/check_astribot_lod.py` provides a separate CPU-rendered before/after review from four views using Open3D. This is an offline asset comparison, not a browser screenshot.
+The exporter uses existing MuJoCo, NumPy, SciPy and VTK installations. It does not require or launch Blender. The exporter checks every retained textured position/UV pair against the source. Tests check original texture hashes, compact-format decoding and invalid inputs, expanded geometry hashes, gzip loading and corruption handling, finite normals, joint kinematics and screen framing. `scripts/check_astribot_lod.py` provides a separate CPU-rendered before/after review from four views using Open3D. This is an offline asset comparison, not a browser screenshot.
 
 ## Rendering and motion
 
