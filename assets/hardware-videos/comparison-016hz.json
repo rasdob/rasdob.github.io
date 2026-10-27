@@ -1,0 +1,152 @@
+{
+  "file": "comparison-016hz.mp4",
+  "poster": "comparison-016hz.jpg",
+  "frame_index": "comparison-016hz.index.csv",
+  "frequency_hz": 0.16,
+  "circle_diameter_m": 0.08,
+  "width": 512,
+  "height": 1122,
+  "fps": 20,
+  "frames": 400,
+  "duration_s": 20.0,
+  "elapsed_start_s": 4.0,
+  "elapsed_end_exclusive_s": 24.0,
+  "playback_speed": 1,
+  "codec": "H.264",
+  "pixel_format": "yuv420p",
+  "fast_start": true,
+  "all_output_frames_decoded": true,
+  "crop_xyxy": [
+    200,
+    60,
+    440,
+    280
+  ],
+  "maximum_source_age_s": 0.05261775500548538,
+  "sources": [
+    {
+      "method": "pd",
+      "label": "PD",
+      "run_id": "20261026_174208_bac7ad",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/hardware_redo_20261026/runs/20261026_174208_bac7ad",
+      "files_sha256": {
+        "camera.avi": "60b4723da08437ee7ae236025c92f255f59c17b1f1a1975142ae7f510818ecca",
+        "video_index.csv": "d929604e39de26e7bf7c8b113d014649f384922d3cf0db7d19d392b4ac20fc2e",
+        "config.json": "702ebdc721ec82761c4bd560871739dbc80065e38d6c474ee7e7a043dda52ec5"
+      },
+      "source_frames": 478,
+      "first_elapsed_s": 9.912399400491267e-05,
+      "last_elapsed_s": 23.974899421998998,
+      "all_source_frames_decoded": true
+    },
+    {
+      "method": "pd_dob",
+      "label": "PD+DOB",
+      "run_id": "20261026_174235_f89d86",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/hardware_redo_20261026/runs/20261026_174235_f89d86",
+      "files_sha256": {
+        "camera.avi": "a938e1a8b14ed4249ed27241318fa81c0d69fd23d9d4332e3f6967d84481a1b3",
+        "video_index.csv": "563002a876733f63464276e8195f8a39c35be5d386d94aeb9bcec47618a619a8",
+        "config.json": "3366bce2a8ef04ce58797b6fe68e5d0d01fdf35adc3f2f253ca0d58498114352"
+      },
+      "source_frames": 479,
+      "first_elapsed_s": 0.0001873580040410161,
+      "last_elapsed_s": 23.999256034003338,
+      "all_source_frames_decoded": true
+    },
+    {
+      "method": "pd_sdob",
+      "label": "PD+SDOB",
+      "run_id": "20261026_174303_0e1cec",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/hardware_redo_20261026/runs/20261026_174303_0e1cec",
+      "files_sha256": {
+        "camera.avi": "8f6dc98220b4e8284aae517babe94d098df2d86ddeeb84ddfeb27a67c37c03ec",
+        "video_index.csv": "621988e10f35d94c632f3b793ddcf01d3f1ac5fbfff3e450d6a83faa866a5b22",
+        "config.json": "e099547a1a6ac59f90d432afcfbe2ba8c73a81660ac871859558167dbcb23e25"
+      },
+      "source_frames": 479,
+      "first_elapsed_s": 6.661299266852438e-05,
+      "last_elapsed_s": 24.02155503499671,
+      "all_source_frames_decoded": true
+    },
+    {
+      "method": "mpc",
+      "label": "MPC",
+      "run_id": "20261026_174330_274acc",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/hardware_redo_20261026/runs/20261026_174330_274acc",
+      "files_sha256": {
+        "camera.avi": "e0a7cacfe605d895ff1223f51f47c5a085b4977ed6848c9c125b492a2f943808",
+        "video_index.csv": "208f01e3f5bb30dfe04cde09c2cbea74b6b8a4ba03710f33edb0f2aa303a6c7a",
+        "config.json": "d17dad8a57f9372ee6fb8844aaa1e5330a8a66a6183535c5bbfae095e9c1434d"
+      },
+      "source_frames": 479,
+      "first_elapsed_s": 0.0001667019969318062,
+      "last_elapsed_s": 24.00393107299169,
+      "all_source_frames_decoded": true
+    },
+    {
+      "method": "dob_mpc",
+      "label": "MPC+DOB",
+      "run_id": "20261026_174357_c7cd47",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/hardware_redo_20261026/runs/20261026_174357_c7cd47",
+      "files_sha256": {
+        "camera.avi": "270b35655dcacbb2c89a11a738c65ec0d782d6c73ab4ef15eb5d64bfd4e567fa",
+        "video_index.csv": "91ff7c0bcdb17bda51f80be5b2368ad5b5e2b549b9bf6b864683819f2a051954",
+        "config.json": "418af95a8e3378a1ca2ba69f80f92028a13916fbbcb18ddbb68120871b9b44b2"
+      },
+      "source_frames": 479,
+      "first_elapsed_s": 0.0003090620011789724,
+      "last_elapsed_s": 23.98539307199826,
+      "all_source_frames_decoded": true
+    },
+    {
+      "method": "raw",
+      "label": "MPC+SDOB",
+      "run_id": "20261026_174424_6b744e",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/hardware_redo_20261026/runs/20261026_174424_6b744e",
+      "files_sha256": {
+        "camera.avi": "3934680b41713cd4ddc3ea2321189ab5039fbf8ddc4c46ac079d502cee556082",
+        "video_index.csv": "2ecb9df7833b21ebc6cebe6dd00e2dd59fbca87b8c34c74123559ac386fdb6aa",
+        "config.json": "c3db0f6d6787a733480aeb6ec97a510f80b923ad3a18a0cfe2709ec5714aefd6"
+      },
+      "source_frames": 479,
+      "first_elapsed_s": 0.00021883299632463604,
+      "last_elapsed_s": 23.998399014002644,
+      "all_source_frames_decoded": true
+    },
+    {
+      "method": "adaptive",
+      "label": "MPC+RA-SDOB",
+      "run_id": "20261026_211745_62d718",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/hardware_redo_20261026/ra_periodic_125/runs/20261026_211745_62d718",
+      "files_sha256": {
+        "camera.avi": "051472170e331331a03e0cb452634431bd06ce868e67af3becc5fced3ded45d7",
+        "video_index.csv": "ee34bf25444c2c9f7dee91e1795ceae678eae5e4f477c3a55a9de5462b60fcd1",
+        "config.json": "de2cf5004852f064a851512fa2bd911454894e8a3f2bd3ee549cb9bbc4f9b033"
+      },
+      "source_frames": 478,
+      "first_elapsed_s": 5.75700105400756e-05,
+      "last_elapsed_s": 23.968858104009996,
+      "all_source_frames_decoded": true
+    }
+  ],
+  "files_sha256": {
+    "comparison-016hz.mp4": "4c03c6ec49ee77a30262dda03281272854940d93c523aa63d8fa3ee98fa0ed82",
+    "comparison-016hz.jpg": "d5b5a0228dc77e48f6c7e92b8cf0566e522db5e3f8ab995d12b33c4346def414",
+    "comparison-016hz.index.csv": "90ae0a9116b84dcb6804584f0afcb5dccb0b64647b1d68f08fb643521908bd0e"
+  }
+}

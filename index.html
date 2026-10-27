@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Explore RA-SDOB: real-to-sim-to-real image disturbance estimation and robot execution-response identification, explained through animations and an interactive simulation.">
+  <title>Image-Based Visual Servoing with a Response-Augmented Sampling-Based Disturbance Observer</title>
+  <link rel="canonical" href="https://rasdob.github.io/">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=20261027design1">
+</head>
+<body>
+<a class="skip" href="#lesson">Skip to the method</a>
+<header class="site-header">
+ <a href="#top" class="wordmark" aria-label="RA-SDOB home">RA-SDOB</a>
+ <nav aria-label="Main navigation"><a href="#lesson">Method</a><a href="#lab">Simulation</a><a href="#evidence">Results</a></nav>
+ <div class="explore"><button id="explore-toggle" class="nav-explore" aria-expanded="false" aria-controls="explore-menu">Explore <span>⌄</span></button><div id="explore-menu" class="explore-menu" hidden><a href="#highlights">Overview</a><a href="#lesson">Step-by-step guide</a><a href="#lab">Interactive simulation</a><a href="#evidence">Paper results</a><a href="#scope">Model scope</a></div></div>
+ <div class="language-switch" role="group" aria-label="Language / 语言" data-i18n-skip><button type="button" data-language="en" lang="en" aria-pressed="true">English</button><button type="button" data-language="cn" lang="zh-CN" aria-pressed="false" aria-label="简体中文">CN</button></div>
+</header>
+<main id="top">
+<section class="hero" aria-labelledby="hero-title">
+ <div class="wrap hero-copy">
+  <p class="hero-acronym" data-i18n-skip>RA-SDOB</p>
+  <h1 id="hero-title">
+   <span class="hero-title-line">Image-Based Visual Servoing</span>
+   <span class="hero-title-line">with a Response-Augmented</span>
+   <span class="hero-title-line">Sampling-Based Disturbance Observer</span>
+  </h1>
+ </div>
+</section>
+
+<section id="highlights" class="highlights-section band" aria-labelledby="highlights-title">
+ <div class="wrap"><div class="section-heading"><div><div class="eyebrow">The approach</div><h2 id="highlights-title">Two estimates for visual servoing</h2></div><a class="text-link" href="#lesson">See how it works <span>↓</span></a></div>
+ <div class="highlights-grid">
+  <a class="highlight" href="#lesson" data-lesson-link="1"><span class="highlight-number">01 / IMAGE DISTURBANCE</span><h3>Estimate image disturbances</h3><p>Reconstruct the camera and target in an auxiliary environment. Combine random sampling with motion priors, weight candidates within each group, and use the group that best explains the image history to forecast disturbances.</p><span class="highlight-bottom">Real-to-sim-to-real estimation <b>↗</b></span></a>
+  <a class="highlight" href="#lesson" data-lesson-link="3"><span class="highlight-number">02 / EXECUTION RESPONSE</span><h3>Identify the robot response</h3><p>Compare past commands with measured joint motion to identify response lag and gain. Use this response estimate alongside the disturbance forecast to predict image motion for visual tracking.</p><span class="highlight-bottom">Online response identification <b>↗</b></span></a>
+ </div></div>
+</section>
+
+<section id="lesson" class="lesson-section wrap" aria-labelledby="lesson-heading">
+  <div class="section-heading"><div><div class="eyebrow">The method</div><h2 id="lesson-heading">How RA-SDOB works</h2></div><p>Select a step or play the full explanation.</p></div>
+  <div class="lesson-tabs" role="tablist" aria-label="Method steps">
+    <button role="tab" aria-selected="true" aria-controls="lesson-panel" id="tab-0" data-step="0"><span>01</span> Motion in pixels</button>
+    <button role="tab" aria-selected="false" aria-controls="lesson-panel" id="tab-1" data-step="1"><span>02</span> Reconstruct &amp; sample</button>
+    <button role="tab" aria-selected="false" aria-controls="lesson-panel" id="tab-2" data-step="2"><span>03</span> Score &amp; predict</button>
+    <button role="tab" aria-selected="false" aria-controls="lesson-panel" id="tab-3" data-step="3"><span>04</span> Identify the response</button>
+  </div>
+  <div class="lesson-panel" id="lesson-panel" role="tabpanel" aria-labelledby="tab-0">
+    <div class="lesson-visual"><div class="canvas-top"><span id="lesson-scene-label">IMAGE PLANE</span><span id="lesson-count">01 / 04</span></div><canvas id="lesson-canvas" width="760" height="530" role="img" aria-label="Animated explanation of the selected step"></canvas><div id="reconstruction-controls" class="reconstruction-controls" hidden>
+      <div class="reconstruction-stages" role="group" aria-label="2D-to-3D demonstration stages"><button data-reconstruction-stage="0" aria-pressed="true"><b>01</b> Spatial consistency</button><span>→</span><button data-reconstruction-stage="1" aria-pressed="false"><b>02</b> Reconstruct</button><span>→</span><button data-reconstruction-stage="2" aria-pressed="false"><b>03</b> Sample motion</button><span>→</span><button data-reconstruction-stage="3" aria-pressed="false"><b>04</b> Project to pixels</button></div>
+      <div class="reconstruction-transport"><button id="reconstruction-play" aria-label="Pause the 2D-to-3D animation">Ⅱ</button><input id="reconstruction-progress" type="range" min="0" max="24" step="0.05" value="0" aria-label="2D-to-3D animation progress"><button id="reconstruction-replay" aria-label="Replay the 2D-to-3D animation" title="Replay">↺</button></div>
+      <p><span id="reconstruction-caption">Spatial consistency · Can one rigid motion explain all four corners?</span><span class="orbit-hint">Drag or use arrow keys to rotate</span></p>
+    </div><div id="estimation-controls" class="reconstruction-controls estimation-controls" hidden>
+      <div id="estimation-stage-buttons" class="reconstruction-stages" role="group" aria-label="Estimation stages"><button data-estimation-stage="0" aria-pressed="true"><b>01</b><span>Add priors</span></button><span>→</span><button data-estimation-stage="1" aria-pressed="false"><b>02</b><span>Compare observations</span></button><span>→</span><button data-estimation-stage="2" aria-pressed="false"><b>03</b><span>Forecast disturbances</span></button></div>
+      <div class="reconstruction-transport"><button id="estimation-play" aria-label="Pause the estimation animation">Ⅱ</button><input id="estimation-progress" type="range" min="0" max="24" step="0.05" value="0" aria-label="Estimation animation progress"><button id="estimation-replay" aria-label="Replay the estimation animation" title="Replay">↺</button></div>
+      <p><span id="estimation-caption">Priors suggest possible motions</span><span id="estimation-hint">Select a stage or scrub the timeline</span></p>
+    </div><div class="scene-legend" id="lesson-legend"></div></div>
+    <div class="lesson-copy"><div class="eyebrow" id="lesson-kicker"></div><h3 id="lesson-title"></h3><p id="lesson-text"></p><div class="equation-card"><div id="lesson-equation" class="equation"></div><div id="lesson-equation-label" class="equation-label"></div></div><div class="lesson-takeaway"><span>Key idea</span><p id="lesson-takeaway"></p></div><div class="lesson-controls"><button id="lesson-prev" class="round-button" aria-label="Previous step">←</button><button id="lesson-play" class="text-button">▶ Play all steps</button><button id="lesson-next" class="round-button" aria-label="Next step">→</button></div><div class="lesson-progress"><div id="lesson-progress"></div></div></div>
+  </div>
+  <div class="method-flow" aria-label="Estimation workflow">
+   <span class="flow-input">Images + motion feedback</span>
+   <span class="flow-arrow" aria-hidden="true">→</span>
+   <strong class="flow-observer">RA-SDOB <small>Spatial reconstruction + image history</small></strong>
+   <span class="flow-arrow" aria-hidden="true">→</span>
+   <div class="flow-outputs">
+    <strong>Image disturbance forecast <small>Pixel motion caused by the target</small></strong>
+    <span class="flow-plus" aria-hidden="true">＋</span>
+    <strong>Execution response estimate <small>Actual motion produced by commands</small></strong>
+   </div>
+  </div>
+  <figure id="paper-framework" class="paper-framework">
+    <a href="./assets/paper-framework.svg" target="_blank" rel="noopener" aria-label="Open the overall framework at full size">
+      <img src="./assets/paper-framework.svg" loading="lazy" decoding="async" width="2145" height="954" alt="Paper Fig. 2: RA-SDOB estimates target motion and robot execution response, providing both estimates to MPC for motion planning.">
+    </a>
+  </figure>
+</section>
+
+<section id="lab" class="lab-section" aria-labelledby="lab-heading">
+ <div class="wrap">
+  <h2 id="lab-heading" class="lab-title">Interactive simulation</h2>
+  <div class="lab-grid">
+    <aside class="lab-settings" aria-label="Simulation settings">
+      <div class="settings-heading"><h3>Experiment settings</h3><button id="reset-settings" class="text-button" title="Restore default settings">Reset ↺</button></div>
+      <label class="field" id="method-field">Controller<select id="method"><option value="ra">MPC + RA-SDOB</option><option value="sdob">MPC + SDOB</option><option value="dob">MPC + DOB</option><option value="mpc">MPC (no disturbance forecast)</option></select></label>
+      <label class="slider-field" id="frequency-field"><span>Motion frequency <output for="frequency" id="frequency-value">0.40 Hz</output></span><input id="frequency" type="range" min="0.08" max="0.40" step="0.01" value="0.40"></label>
+      <label class="slider-field"><span>Image noise <output for="noise" id="noise-value">0.35 px</output></span><input id="noise" type="range" min="0" max="1.5" step="0.05" value="0.35"></label>
+      <div class="settings-divider"></div>
+      <div class="settings-label">OBSERVER <span>Estimator</span></div>
+      <label class="slider-field"><span>History window <output for="history" id="history-value">0.75 s</output></span><input id="history" type="range" min="0.05" max="1.25" step="0.05" value="0.75"></label>
+      <label class="slider-field"><span>DOB gain <output for="gain" id="gain-value">10</output></span><input id="gain" type="range" min="2" max="40" step="1" value="10"></label>
+      <button id="share-config" class="button outline full">Copy experiment link <span>↗</span></button>
+    </aside>
+    <div class="lab-workspace">
+      <div class="view-grid"><div class="viewport scene-view"><div class="view-title">Astribot S1 <span>ROBOT VIEW</span><button id="lab-view-reset" class="icon-button" aria-label="Reset the robot view" title="Reset view">↺</button></div><div class="lab-robot-stage"><canvas id="world-canvas" width="760" height="500" role="img" tabindex="0" aria-label="Astribot S1 model with wrist motion driven by the simulated camera; drag to rotate and scroll to zoom"></canvas><div id="lab-model-fallback" class="model-fallback" hidden><img src="./assets/experimental-setup.png" alt="Astribot S1 experimental setup"><p>3D view unavailable. The simulation still runs.</p></div></div><div class="view-foot"><span><i style="--dot:#1c8b77"></i>Target</span><span><i style="--dot:#0071e3"></i>Wrist camera</span><span id="lab-model-status" role="status">Loading model…</span></div></div><div class="viewport camera-view"><div class="view-title">Camera image <span id="visibility">Features visible</span></div><canvas id="image-canvas" width="640" height="360" role="img" aria-label="Observed, desired and predicted pixel positions of the four corners"></canvas><div class="view-foot"><span><i style="--dot:#1c8b77"></i>Observed corners</span><span><i style="--dot:#8b9ba4"></i>Desired corners</span><span id="prediction-legend"><i style="--dot:#b56e18"></i>MPC prediction</span></div></div></div>
+      <div class="transport"><div class="transport-buttons"><button id="play" class="button play-button">▶ Start simulation</button><button id="step" class="square-button" aria-label="Advance one step (0.05 s)" title="Advance one step (0.05 s)">▸│</button><button id="reset" class="square-button" aria-label="Reset this run" title="Reset this run">↺</button><select id="playback" aria-label="Playback speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></div></div>
+      <div class="timeline"><div id="sim-progress"></div></div>
+      <div class="experiment-hint" id="experiment-hint" aria-live="polite">Press Start. The target begins moving immediately.</div>
+      <div class="chart-panel"><div class="chart-heading"><h4 id="chart-title">Corner tracking error</h4><div class="chart-toggles" role="group" aria-label="Chart type"><button class="active" data-chart="tracking" aria-pressed="true">Tracking error</button><button data-chart="x" aria-pressed="false">Horizontal disturbance</button><button data-chart="y" aria-pressed="false">Vertical disturbance</button><button data-chart="error" aria-pressed="false">Estimation error</button></div></div><canvas id="chart-canvas" width="1000" height="230" role="img" aria-label="Tracking error and image disturbance estimates over time"></canvas><div class="chart-legend" id="chart-legend"><span><i style="--dot:#147d6c"></i>Four-corner RMSE</span></div></div>
+    </div>
+  </div>
+  <details id="scope" class="model-details"><summary>What does this simulation model? <span>＋</span></summary><div class="details-columns"><div><h4>Core estimation and control</h4><p>SDOB samples image disturbances around its previous estimate and checks one-step image predictions against observations. Its weighting temperature adjusts between observations using the sum of unnormalized candidate weights. RA-SDOB reconstructs spatial motion, adds motion-prior groups and identifies the arm response. MPC uses the estimates to plan tracking under motion and visibility constraints.</p></div><div><h4>Robot geometry, simplified simulation</h4><p>The 3D view uses the paper’s Astribot S1 model. The computation assumes planar motion at fixed depth and orientation. Full robot dynamics, contact, occlusion and feature detection are omitted. Rendering is separate from estimation, and control optimization is simplified. This teaching demo does not replace the paper experiments.</p></div><div><h4>Timing and visibility</h4><p>Each run lasts 24 s with a 0.05 s time step. The target moves from the start. Charts show tracking error and disturbance estimates. Estimates are not clipped. Feature updates stop when the target leaves the field of view, and the interface displays a notice.</p></div></div></details>
+ </div>
+</section>
+
+<section id="evidence" class="evidence-section wrap" aria-labelledby="evidence-heading">
+ <div class="section-heading"><div><div class="eyebrow">Experimental results</div><h2 id="evidence-heading">Estimation and tracking results</h2></div><p>Paper experiments · mean ± std<br>Separate from the browser demonstration</p></div>
+ <div class="paper-results"><div class="results-intro"><div><span class="eyebrow">TABLE II / DISTURBANCE ESTIMATION</span><h3>Disturbance estimation across motions.</h3><p>Constant-velocity and circular motions are tested at different speeds. Each observer keeps its settings across conditions. These simulations evaluate disturbance estimation without tracking control.</p></div><div class="results-meta"><span><b>0.05 / 0.75 s</b>SDOB / RA-SDOB window</span><span><b>3 runs</b>Per condition</span><span><b>px/s</b>Disturbance RMSE</span></div></div>
+ <div class="results-toolbar"><div class="segmented" role="group" aria-label="Motion type in paper results"><button class="active" data-evidence-motion="line" aria-pressed="true" aria-controls="evidence-line">Linear motion</button><button data-evidence-motion="circle" aria-pressed="false" aria-controls="evidence-circle">Circular motion</button></div></div>
+ <div id="evidence-line" class="table-scroll"><table><caption class="sr-only">Linear-motion disturbance estimation, RMSE in px/s, mean ± std</caption><thead><tr><th scope="col">Observer</th><th scope="col">0.04 m/s</th><th scope="col">0.07 m/s</th><th scope="col">0.10 m/s</th></tr></thead><tbody><tr><th scope="row">DOB · Gain 2</th><td class="best">1.308 ± 0.019</td><td>2.695 ± 0.010</td><td>5.283 ± 0.026</td></tr><tr><th scope="row">DOB · Gain 5</th><td>2.083 ± 0.066</td><td>2.116 ± 0.094</td><td>1.994 ± 0.105</td></tr><tr><th scope="row">DOB · Gain 10</th><td>3.602 ± 0.114</td><td>3.623 ± 0.165</td><td>3.352 ± 0.192</td></tr><tr><th scope="row">DOB · Gain 20</th><td>5.699 ± 0.187</td><td>5.717 ± 0.278</td><td>5.285 ± 0.332</td></tr><tr><th scope="row">DOB · Gain 40</th><td>8.066 ± 0.279</td><td>8.073 ± 0.437</td><td>7.465 ± 0.530</td></tr><tr><th scope="row">SDOB</th><td>6.273 ± 0.414</td><td>6.420 ± 0.710</td><td>6.204 ± 0.537</td></tr><tr class="ours"><th scope="row">RA-SDOB</th><td>1.402 ± 0.304</td><td class="best">1.303 ± 0.179</td><td class="best">1.374 ± 0.082</td></tr></tbody></table></div>
+ <div id="evidence-circle" class="table-scroll" hidden><table><caption class="sr-only">Circular-motion disturbance estimation, RMSE in px/s, mean ± std</caption><thead><tr><th scope="col">Observer</th><th scope="col">0.16 Hz</th><th scope="col">0.28 Hz</th><th scope="col">0.40 Hz</th></tr></thead><tbody><tr><th scope="row">DOB · Gain 2</th><td>15.777 ± 0.013</td><td>40.071 ± 0.011</td><td>67.282 ± 0.011</td></tr><tr><th scope="row">DOB · Gain 5</th><td>7.731 ± 0.018</td><td>21.829 ± 0.010</td><td>41.619 ± 0.018</td></tr><tr><th scope="row">DOB · Gain 10</th><td>5.563 ± 0.060</td><td>13.189 ± 0.011</td><td>25.572 ± 0.026</td></tr><tr><th scope="row">DOB · Gain 20</th><td>6.298 ± 0.143</td><td>9.634 ± 0.083</td><td>16.671 ± 0.062</td></tr><tr><th scope="row">DOB · Gain 40</th><td>8.325 ± 0.233</td><td>9.652 ± 0.195</td><td>13.315 ± 0.152</td></tr><tr><th scope="row">SDOB</th><td>6.182 ± 0.108</td><td>6.865 ± 0.106</td><td>9.800 ± 0.216</td></tr><tr class="ours"><th scope="row">RA-SDOB</th><td class="best">1.996 ± 0.050</td><td class="best">1.851 ± 0.143</td><td class="best">1.787 ± 0.077</td></tr></tbody></table></div>
+ <p class="evidence-note"><span class="best-key"></span> The lowest mean in each column is highlighted. Linear motion is scored over approximately the last 3.5, 1.5 and 0.75 s of the passes, in order of increasing speed, and circular motion over the final 16 s. RA-SDOB has the lowest mean in five of six conditions. DOB with gain 2 is slightly lower at 0.04 m/s. Linear speeds are rounded to two decimal places.</p></div>
+ <section id="hardware-videos" class="hardware-section" aria-labelledby="hardware-heading">
+  <div class="hardware-heading"><span class="eyebrow">REAL-ROBOT TRACKING</span><h3 id="hardware-heading">Real-robot tracking comparison.</h3><p>Seven methods track a target moving in a circle on Astribot S1. The clips show separate trials aligned by elapsed time, from 4 to 24 s at normal speed.</p></div>
+  <div class="hardware-video-list" tabindex="0" role="region" aria-label="Real-robot videos ordered by increasing frequency">
+   <figure class="hardware-video-card">
+    <figcaption><strong>0.16 Hz</strong><span>Circular target motion · Seven methods</span></figcaption>
+    <video controls playsinline preload="none" width="512" height="1122" poster="./assets/hardware-videos/comparison-016hz.jpg" aria-label="Seven-method real-robot tracking comparison at 0.16 Hz">
+     <source src="./assets/hardware-videos/comparison-016hz.mp4" type="video/mp4">
+     <p>Your browser does not support embedded video. <a href="./assets/hardware-videos/comparison-016hz.mp4">Download the 0.16 Hz comparison video.</a></p>
+    </video>
+   </figure>
+   <figure class="hardware-video-card">
+    <figcaption><strong>0.28 Hz</strong><span>Circular target motion · Seven methods</span></figcaption>
+    <video controls playsinline preload="none" width="512" height="1122" poster="./assets/hardware-videos/comparison-028hz.jpg" aria-label="Seven-method real-robot tracking comparison at 0.28 Hz">
+     <source src="./assets/hardware-videos/comparison-028hz.mp4" type="video/mp4">
+     <p>Your browser does not support embedded video. <a href="./assets/hardware-videos/comparison-028hz.mp4">Download the 0.28 Hz comparison video.</a></p>
+    </video>
+   </figure>
+   <figure class="hardware-video-card">
+    <figcaption><strong>0.40 Hz</strong><span>Circular target motion · Seven methods</span></figcaption>
+    <video controls playsinline preload="none" width="512" height="1122" poster="./assets/hardware-videos/comparison-040hz.jpg" aria-label="Seven-method real-robot tracking comparison at 0.40 Hz">
+     <source src="./assets/hardware-videos/comparison-040hz.mp4" type="video/mp4">
+     <p>Your browser does not support embedded video. <a href="./assets/hardware-videos/comparison-040hz.mp4">Download the 0.40 Hz comparison video.</a></p>
+    </video>
+   </figure>
+  </div>
+ </section>
+</section>
+</main>
+<footer class="wrap"><div class="references"><span>Page and model references</span><a href="https://supermimic.github.io/" target="_blank" rel="noopener">SuperMimic ↗</a><a href="./assets/astribot/README.md">Astribot S1 model notes ↗</a><a href="https://github.com/lagadic/visp" target="_blank" rel="noopener">ViSP ↗</a><a href="https://github.com/zalo/mujoco_wasm" target="_blank" rel="noopener">MuJoCo WASM ↗</a><a href="https://github.com/google-deepmind/mujoco_mpc" target="_blank" rel="noopener">MuJoCo MPC ↗</a><small>Layout inspired by SuperMimic. This page is independently implemented.</small></div></footer>
+<div id="toast" role="status" class="toast" hidden></div>
+<noscript><div class="noscript">Enable JavaScript for animations and simulation. Paper results and method descriptions remain available.</div></noscript>
+<script type="module" src="./app.mjs?v=20261027design1"></script>
+</body></html>
