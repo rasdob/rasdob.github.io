@@ -1,4 +1,4 @@
-import {t} from './i18n.mjs?v=20261027model1';
+import {t} from './i18n.mjs?v=20261027corners1';
 // A three-dimensional pinhole scene, drawn with Canvas so the lesson also works
 // when WebGL is unavailable. Units and trajectories are illustrative.
 export const RECONSTRUCTION_DURATION=24;
@@ -6,7 +6,7 @@ export const RECONSTRUCTION_STAGES=[
  {time:5.5,caption:'Physical consistency · One motion for all corners',title:'Can one rigid object explain these pixels?',subtitle:'Illustration: corners spread horizontally but keep their height',text:'Suppose the estimated corner motions spread the marker horizontally without changing its height. These pixel velocities cannot all come from one rigid motion at the shown geometry. Back-projecting them at the current depth would stretch the marker.',equation:'Pixel disturbance ≠ a consistent rigid motion',note:'Illustration with a front-facing marker and known geometry and depth. Orange shows fixed-depth back-projection, not measured observer output.',takeaway:'Sample object motion in 3D, then project all corners so their pixel disturbances share one physical explanation.'},
  {time:11.8,caption:'Real to sim · Reconstruct from observations',title:'Give image history a spatial basis',subtitle:'Pixels define rays; depth and camera pose locate points in 3D',text:'Combine images, estimated depth and measured camera motion to reconstruct target features in an auxiliary environment. The target geometry ties the features together for consistent motion prediction.',equation:'Images + depth + camera poses → 3D history',note:'This view illustrates projection geometry. Each historical image uses its corresponding camera pose.',takeaway:'The auxiliary environment links pixel changes to object motion.'},
  {time:18,caption:'Sampling · Explore possible target motion',title:'Explore possible motion in 3D',subtitle:'Preserve target shape and respect motion bounds',text:'Sample possible motions from the reconstructed history in the auxiliary environment. The target can move straight, turn or accelerate while preserving its shape and respecting speed and acceleration bounds. Images determine which motions fit.',equation:'Reconstruct → sample motions → compare with images',note:'Colored paths illustrate possible motions. The actual target trajectory is not known in advance.',takeaway:'Use spatially consistent motions, then let observations select them.'},
- {time:24,caption:'Sim to real · Return an image disturbance forecast',title:'From object motion to image disturbance',subtitle:'One motion, explained in both 3D and the image',text:'Project the target motion back into the image. Holding the current camera pose fixed isolates the target-induced pixel disturbance. Historical observations determine how much support each motion receives.',equation:'3D motion → pixel changes → image disturbance',note:'Green illustrates the link between 3D motion and pixel changes.',takeaway:'The output is an image disturbance, supported by object motion in 3D.'}
+ {time:24,caption:'Sim to real · Return an image disturbance forecast',title:'From object motion to image disturbance',subtitle:'One object motion → four projected corners',text:'Project all four corners of the moving target back into the image. Each corner has its own pixel displacement, while all four share the same object motion. Holding the current camera pose fixed isolates the target-induced disturbance.',equation:'3D motion → four corner displacements → image disturbance',note:'Matching numbers link each 3D corner to its image projection. Arrows show the pixel displacement of each corner.',takeaway:'One spatial motion explains the image disturbance at all four corners.'}
 ];
 export const IMAGE_DEPTH=1.15;
 export const TARGET_DEPTH=3.2;
@@ -79,6 +79,14 @@ function markerCorners(c,project,corners,opacity=1){
 function marker(c,project,center,size,opacity=1){
  markerCorners(c,project,[[-1,1],[1,1],[1,-1],[-1,-1]].map(([x,y])=>[center[0]+x*size/2,center[1]+y*size/2,center[2]]),opacity);
 }
+function cornerLabels(c,points,color,size=10,bounds=[80,436]){
+ const offsets=[[-7,-7],[7,-7],[7,13],[-7,13]];
+ points.forEach((p,i)=>{
+  dot(c,p,'#fff',4.5);dot(c,p,color,2.8);
+  const baseline=Math.max(bounds[0]+size+2,Math.min(bounds[1]-2,p[1]+offsets[i][1]));
+  text(c,String(i+1),p[0]+offsets[i][0],baseline,size,color,i===0||i===3?'right':'left');
+ });
+}
 export function candidatePath(family,t,variant=0){
  const [x,y,z]=TARGET_CENTER;
  if(family===0)return [x+(.8+variant*.13)*t,y+(.65+variant*.08)*t,z+(.48+variant*.06)*t];
@@ -86,14 +94,21 @@ export function candidatePath(family,t,variant=0){
  if(family===2){const a=t*2.4,r=.55+variant*.035;return [x+r*2/Math.sqrt(5)*Math.sin(a),y+r*(1-Math.cos(a)),z+r/Math.sqrt(5)*Math.sin(a)];}
  return [x-.42*t+.12*Math.sin(t*6)*t+variant*.10*t,y-.45*t+.16*Math.sin(t*7)*t,z+.95*t];
 }
+/** Stable corner order: top-left, top-right, bottom-right, bottom-left.
+ * Translate the rigid marker first, then project each corner independently.
+ */
+export function candidateCorners(family,time,variant=0){
+ const center=candidatePath(family,time,variant);
+ return TARGET_CORNERS.map(corner=>corner.map((value,axis)=>value+center[axis]-TARGET_CENTER[axis]));
+}
 function pixelInset(c,state,seconds){
- const {stage,sampling,returning}=state,x=22,y=290,w=210,h=142;
+ const {stage,sampling,returning}=state,x=22,y=232,w=236,h=204;
  card(c,x,y,w,h);
  text(c,stage===0?'Pixel disturbance':'Image projection',x+15,y+23,12,'#344b60');
- const origin=imagePoint(TARGET_CENTER),map=p=>[x+68+(p[0]-origin[0])*190,y+99-(p[1]-origin[1])*190];
- c.save();c.beginPath();c.rect(x+10,y+33,w-20,86);c.clip();
- for(let a=x+18;a<x+w;a+=23)stroke(c,[[a,y+33],[a,y+119]],'#eaf0f5',.7);
- for(let b=y+35;b<y+120;b+=21)stroke(c,[[x+10,b],[x+w-10,b]],'#eaf0f5',.7);
+ const origin=imagePoint(TARGET_CENTER),map=p=>[x+72+(p[0]-origin[0])*210,y+144-(p[1]-origin[1])*210];
+ c.save();c.beginPath();c.rect(x+10,y+33,w-20,h-58);c.clip();
+ for(let a=x+18;a<x+w;a+=23)stroke(c,[[a,y+33],[a,y+h-25]],'#eaf0f5',.7);
+ for(let b=y+35;b<y+h-25;b+=21)stroke(c,[[x+10,b],[x+w-10,b]],'#eaf0f5',.7);
  if(stage===0){
   const focus=imagePoint(TARGET_CENTER),zoom=p=>[x+w/2+(p[0]-focus[0])*300,y+77-(p[1]-focus[1])*300];
   const current=TARGET_CORNERS.map(imagePoint),predicted=examplePixels(smooth(0,5.5,seconds));
@@ -108,20 +123,25 @@ function pixelInset(c,state,seconds){
   c.globalAlpha=1-returning*.6;
   // A front-facing view of the same projected marker, larger than its oblique view.
   const toInset=p=>map(p);marker(c,toInset,origin,MARKER_SIZE*IMAGE_DEPTH/TARGET_DEPTH,.85);
-  for(const p of TARGET_CORNERS.map(imagePoint))dot(c,map(p),'#0071e3',2.2);
+  for(const p of TARGET_CORNERS.map(imagePoint))dot(c,map(p),'#0071e3',3);
   c.globalAlpha=1;
   if(sampling>0)for(let family=0;family<4;family++){
-   c.globalAlpha=family===2?1:1-returning*.80;
-   const points=Array.from({length:49},(_,i)=>map(imagePoint(candidatePath(family,i/48*sampling))));
-   stroke(c,points,colors[family],family===2?2.5:1.5);
-   dot(c,points.at(-1),colors[family],3);
+   c.globalAlpha=family===2?.55:Math.max(.06,(1-returning)*.4);
+   for(let corner=0;corner<4;corner++){
+    const points=Array.from({length:49},(_,i)=>map(imagePoint(candidateCorners(family,i/48*sampling)[corner])));
+    stroke(c,points,colors[family],family===2?1.4:.7);
+   }
   }
   if(returning>0){
-   const t=clamp((seconds-18)/6),a=map(imagePoint(candidatePath(2,t))),b=map(imagePoint(candidatePath(2,Math.min(1,t+.08))));
-   dot(c,a,'#fff',5);dot(c,a,colors[2],3);stroke(c,[a,b],colors[2],3);
+   c.globalAlpha=1;
+   const time=clamp((seconds-18)/6),pixels=candidateCorners(2,time).map(imagePoint),next=candidateCorners(2,time+.14).map(imagePoint);
+   markerCorners(c,map,pixels,.8);
+   poly(c,pixels.map(map),null,colors[2],1.8);
+   pixels.forEach((p,i)=>arrow(c,map(p),map(next[i]),colors[2],1.8));
+   cornerLabels(c,pixels.map(map),colors[2],10,[y+33,y+h-25]);
   }
  }
- c.restore();text(c,stage===0?'Wider, with unchanged height':stage===3?'Green: projected object motion':stage===1?'Projected target corners':'3D paths predict pixel motion',x+15,y+132,10,'#7d8c99');
+ c.restore();text(c,stage===0?'Wider, with unchanged height':stage===3?'Four corners · four pixel motions':stage===1?'Projected target corners':'3D paths predict pixel motion',x+15,y+h-10,10,'#7d8c99');
 }
 export function drawReconstruction(c,seconds,view={yaw:0,pitch:0}){
  const state=reconstructionState(seconds),{turn,inconsistency,rays,lift,sampling,returning,stage}=state;
@@ -196,17 +216,22 @@ export function drawReconstruction(c,seconds,view={yaw:0,pitch:0}){
    if(family===2&&returning>0){c.globalAlpha*=.12;stroke(c,points,colors[family],10);c.globalAlpha=sampling;}
    stroke(c,points,colors[family],2.3);
    for(const t of [.35,.67])if(sampling>t)marker(c,project,candidatePath(family,t),MARKER_SIZE,.12);
-   const end=candidatePath(family,sampling);marker(c,project,end,MARKER_SIZE,.95);dot(c,project(end),colors[family],2.5);c.restore();
+   const end=candidatePath(family,sampling);marker(c,project,end,MARKER_SIZE,.95*(1-returning*.8));c.restore();
    c.save();c.globalAlpha=sampling*emphasis*.8;
-   stroke(c,Array.from({length:49},(_,i)=>project(imagePoint(candidatePath(family,i/48*sampling)))),colors[family],1.8);
+   for(let corner=0;corner<4;corner++)stroke(c,Array.from({length:49},(_,i)=>project(imagePoint(candidateCorners(family,i/48*sampling)[corner]))),colors[family],family===2?1.2:.65);
    c.restore();
   }
  }
  if(returning>0){
   c.save();c.globalAlpha=returning;
-  for(const t of [.25,.6,1])stroke(c,[project(candidatePath(2,t)),project(imagePoint(candidatePath(2,t)))],'#147d6c55',1,[3,5]);
-  const t=clamp((seconds-18)/6),point=candidatePath(2,t),pixel=imagePoint(point);
-  stroke(c,[project(point),project(pixel)],'#147d6c',1.5);dot(c,project(point),'#147d6c',5);dot(c,project(pixel),'#147d6c',4);
+  const time=clamp((seconds-18)/6),corners=candidateCorners(2,time),pixels=corners.map(imagePoint),next=candidateCorners(2,time+.14).map(imagePoint);
+  markerCorners(c,project,corners,.95);markerCorners(c,project,pixels,.85);
+  poly(c,corners.map(project),null,'#147d6c',1.8);poly(c,pixels.map(project),null,'#147d6c',1.8);
+  corners.forEach((corner,i)=>{
+   stroke(c,[project(corner),project(pixels[i])],'#147d6c85',1.2,[4,4]);
+   arrow(c,project(pixels[i]),project(next[i]),'#147d6c',2);
+  });
+  cornerLabels(c,corners.map(project),'#147d6c');cornerLabels(c,pixels.map(project),'#147d6c');
   c.restore();
  }
  // The coordinate triad makes depth and the orbit direction explicit.
@@ -216,8 +241,10 @@ export function drawReconstruction(c,seconds,view={yaw:0,pitch:0}){
   const end=origin.map((v,i)=>v+offset[i]);stroke(c,[origin,end].map(project),color,1.7);const p=project(end);text(c,axis,p[0]+5,p[1],11,color);
  }
  c.restore();c.restore();
- const imageLabel=project([0,-IMAGE_HALF_HEIGHT-.16,IMAGE_DEPTH]);tag(c,'2D image plane',imageLabel);
- if(turn>.4){const p=project([0,-.39,-.05]);tag(c,'Camera',p,'#536a80');}
+ const imageLabel=project([0,-IMAGE_HALF_HEIGHT-.16,IMAGE_DEPTH]);
+ if(turn>.4)imageLabel[0]=Math.max(imageLabel[0],336);
+ tag(c,'2D image plane',imageLabel);
+ if(turn>.4){const p=project([0,.4,-.05]);tag(c,'Camera',p,'#536a80');}
  if(lift>.95){const p=project([TARGET_CENTER[0]-.28,TARGET_CENTER[1]-half-.18,TARGET_DEPTH]);tag(c,'Reconstructed target',p,'#147d6c');}
  if(rays>.5&&sampling<.2){const p=project([-.25,-.50,2.15]);tag(c,'Depth → 3D position',p,'#a77426');}
  if(inconsistency>.3){
@@ -231,7 +258,7 @@ export function drawReconstruction(c,seconds,view={yaw:0,pitch:0}){
   [['Image plane','Corners can be estimated independently','#b56e18'],['One rigid motion','A rigid marker cannot simply stretch','#147d6c']],
   [['Reconstruction inputs','Images · depth · measured camera motion','#0071e3'],['Spatial constraints','Target features and rigid geometry','#147d6c']],
   [['Motion bounds','Fixed shape; bounded speed and acceleration','#147d6c'],['Possible motions','Straight, accelerating, turning or irregular','#0071e3']],
-  [['3D → image','Object motion explains pixel changes','#147d6c'],['Next','Check predictions against observations','#0071e3']]
+  [['3D → image','One motion projects all four corners','#147d6c'],['Next','Compare corresponding corners','#0071e3']]
  ][stage];
  facts.forEach(([heading,value,color],i)=>{const x=28+i*362;card(c,x,450,342,62);text(c,heading,x+15,470,10,'#7d8c99');text(c,value,x+15,495,13,color);});
 }

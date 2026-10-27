@@ -1,7 +1,7 @@
-import {t} from './i18n.mjs?v=20261027model1';
-import {drawReconstruction} from './reconstruction.mjs?v=20261027model1';
-import {drawEstimationLesson} from './estimation-lessons.mjs?v=20261027model1';
-import {project} from './engine.mjs?v=20261027model1';
+import {t} from './i18n.mjs?v=20261027corners1';
+import {drawReconstruction} from './reconstruction.mjs?v=20261027corners1';
+import {drawEstimationLesson} from './estimation-lessons.mjs?v=20261027corners1';
+import {project} from './engine.mjs?v=20261027corners1';
 const palette={green:'#147d6c',orange:'#b56e18',blue:'#0071e3',ink:'#31343a',grid:'#dedee3',dim:'#6e6e73',light:'#ffffff',dark:'#f5f5f7',mint:'#147d6c',gold:'#b56e18',ice:'#0071e3'};
 const font='"Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif';
 function surface(canvas,w,h){

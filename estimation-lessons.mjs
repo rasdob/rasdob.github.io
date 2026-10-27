@@ -1,11 +1,11 @@
-import {t} from './i18n.mjs?v=20261027model1';
+import {t} from './i18n.mjs?v=20261027corners1';
 /** Conceptual teaching scenes. No simulation results or measured scores are fabricated here. */
 export const ESTIMATION_DURATION=24;
 export const ESTIMATION_LESSONS={
   2:{stages:[
     {time:7,title:'Add priors',caption:'RA-SDOB · Add motion priors',text:'SDOB samples image disturbances around its previous estimate. RA-SDOB samples random spatial trajectories alongside constant-velocity, accelerating and circular motion priors.',note:'Priors describe possible motion, without knowing the actual target trajectory.',takeaway:'Propose possible motions, then check them against observations.'},
-    {time:15,title:'Compare',caption:'RA-SDOB · Check motion against images',text:'Project each motion into the image and compare it with observed pixels. Better matches receive more weight within each group; the groups are then compared.',note:'Green marks the better match in this illustration. Other observations can favor a different motion.',takeaway:'Priors support estimation; observations decide.'},
-    {time:24,title:'Forecast',caption:'RA-SDOB · Forecast image disturbances',text:'Extend the selected motion into the future and project it into the image to forecast the target-induced pixel disturbance.',note:'This animation illustrates the method, not recorded results. Each new image updates the estimate.',takeaway:'Select motion from observations, then forecast pixel changes.'}
+    {time:15,title:'Compare',caption:'RA-SDOB · Check motion against images',text:'Project each motion into the image and compare all four corresponding corners. Better matches receive more weight within each group; the groups are then compared.',note:'Hollow rings show observed corners; filled dots show predictions. Compare each corner with the same corner in the image.',takeaway:'Four corresponding corners decide how well a motion fits.'},
+    {time:24,title:'Forecast',caption:'RA-SDOB · Forecast image disturbances',text:'Extend the selected motion into the future and project all four corners into the image. Predict one pixel displacement per corner.',note:'The four arrows show one displacement per corner. This is an illustration; each new image updates the estimate.',takeaway:'Select motion from four corners, then forecast each corner.'}
   ]},
   3:{stages:[
     {time:7,title:'Try models',caption:'Response estimation · Test possible response lags',text:'Apply the same command history to candidate response models. Search over response lag and fit a gain for each candidate using position feedback.',note:'Lag is searched within a chosen range; gain is fitted from history. Candidates are evaluated in the model.',takeaway:'The arm takes time to respond to a velocity command.'},
@@ -39,20 +39,51 @@ function camera(c,x,y,color=C.blue){rect(c,x-18,y-11,36,22,'#eaf3fe',color);dot(
 function grid(c,x,y,w,h){for(let a=x;a<=x+w;a+=35)line(c,[[a,y],[a,y+h]]);for(let b=y;b<=y+h;b+=35)line(c,[[x,b],[x+w,b]]);}
 function heading(c,step,s){const meta=ESTIMATION_LESSONS[step].stages[s.stage];text(c,meta.caption,26,31,C.dim,12);text(c,meta.title,26,61,C.ink,23);text(c,'Illustration',733,31,C.dim,11,'right');for(let i=0;i<3;i++){const x=535+i*69;rect(c,x,47,61,23,i===s.stage?'#e6f2ee':'#fff');text(c,ESTIMATION_LESSONS[step].stages[i].title,x+30,63,i===s.stage?C.green:C.dim,10,'center');}}
 function trajectory(f,u){if(f===0)return -.35*u;if(f===1)return -.65*u*u;if(f===2)return -.62*Math.sin(u*1.55);return -.3*u-.13*Math.sin(u*7);}
+/** Ordered rigid square corners projected through a synthetic pinhole camera.
+ * IDs 1–4 remain attached to the same local corners throughout every motion. */
+export function scoreMarkerCorners(u,family=2){
+ const angle=.2*u,tilt=.35*u,depth=4+.3*u;
+ const center=[(97+200*u-247)*depth/220,(350+trajectory(family,u)*100-320)*depth/220,depth];
+ return [[-1,-1],[1,-1],[1,1],[-1,1]].map(([x,y])=>{
+  const a=x*.4,b=y*.4,rx=a*Math.cos(angle)-b*Math.sin(angle),ry=a*Math.sin(angle)+b*Math.cos(angle);
+  const world=[center[0]+rx*Math.cos(tilt),center[1]+ry,center[2]-rx*Math.sin(tilt)];
+  return [247+220*world[0]/world[2],320+220*world[1]/world[2]];
+ });
+}
+export function scoreCornerResiduals(u,family){
+ const observed=scoreMarkerCorners(u,2),predicted=scoreMarkerCorners(u,family);
+ return observed.map((point,id)=>({id,observed:point,predicted:predicted[id],squaredError:point.reduce((sum,value,axis)=>sum+(value-predicted[id][axis])**2,0)}));
+}
+/** Unweighted geometric error for the conceptual example, not the full estimator. */
+export function scoreCornerCost(family){
+ return [0,.35,.7,1].reduce((sum,u)=>sum+scoreCornerResiduals(u,family).reduce((total,r)=>total+r.squaredError,0),0);
+}
 function scoreScene(c,s){
  const colors=[C.blue,C.orange,C.green,C.purple],names=['Constant velocity','Acceleration','Circular motion','Random motion'];
  names.forEach((name,i)=>{const x=26+i*181;rect(c,x,83,167,86,s.stage===0?'#f7f9fc':'#fff');text(c,name,x+13,105,colors[i],12);const pts=Array.from({length:40},(_,j)=>{const u=j/39;if(i===2)return [x+84+46*Math.cos(u*Math.PI*2),138+18*Math.sin(u*Math.PI*2)];return [x+16+u*131,146+trajectory(i,u)*39];});line(c,pts,colors[i],2);const p=pts[Math.min(39,Math.floor((s.time*.35+i*.15)%1*40))];dot(c,...p,4,colors[i]);});
- rect(c,26,184,443,263,'#f9fbfd');grid(c,42,221,410,199);text(c,s.stage===0?'Project motion into the image':s.stage===1?'Predicted pixels and observations':'Extend the selected motion',43,207,C.dim,12);
- const now=302,base=385;line(c,[[now,226],[now,425]],'#9ba9b7',1,[4,5]);text(c,'Now',now,439,C.dim,10,'center');text(c,'Image history',80,439,C.dim,10);text(c,'Future',402,439,C.dim,10);
- const point=(u,f)=>[57+245*u,base+trajectory(f,u)*140];
- for(let f=0;f<4;f++){c.save();c.globalAlpha=s.stage===0?.65:f===2?1:.27;line(c,Array.from({length:51},(_,i)=>point(i/50,f)),colors[f],f===2?2.8:1.5);c.restore();}
- const observed=Array.from({length:11},(_,i)=>point(i/10,2));const sweep=s.stage===0?.35:clamp((s.time-8)/6);observed.forEach((p,i)=>{if(i/10<=sweep){dot(c,...p,5,'#fff');dot(c,...p,2.6,'#5e6b77');}});
- if(s.stage===1){const u=clamp((s.time-8)/8);const obs=point(u,2);line(c,[[obs[0],224],[obs[0],420]],'#a8c7e3',1.5);for(let f=0;f<4;f++)line(c,[obs,point(u,f)],colors[f],1,[2,3]);dot(c,...obs,6,C.green);}
- if(s.stage===2){const start=point(1,2),future=Array.from({length:41},(_,i)=>{const u=1+i/40*.57;return point(u,2);});line(c,future.slice(0,Math.max(2,Math.floor(s.reveal*41))),C.green,3,[5,4]);marker(c,...start,25);for(let i=1;i<=3;i++){const p=future[i*12];if(s.reveal>=i*.27){marker(c,...p,24,.16+i*.08);const before=future[i*12-1],after=future[i*12+1],dx=after[0]-before[0],dy=after[1]-before[1],scale=22/Math.hypot(dx,dy);arrow(c,[p[0]-dx*scale/2,p[1]+27-dy*scale/2],[p[0]+dx*scale/2,p[1]+27+dy*scale/2],C.green,1.5);}}}
+ rect(c,26,184,443,263,'#f9fbfd');grid(c,42,221,410,199);text(c,s.stage===0?'Project motion into the image':s.stage===1?'Compare all four corresponding corners':'Extend the selected motion',43,207,C.dim,12);
+ const drawCorners=(points,color,width=1.5,dash=[],labels=false,hollow=false)=>{line(c,[...points,points[0]],color,width,dash);points.forEach((p,i)=>{if(hollow){c.beginPath();c.arc(...p,5.5,0,Math.PI*2);c.strokeStyle=color;c.lineWidth=1.7;c.stroke();}else dot(c,...p,3,color);if(labels)text(c,String(i+1),p[0]+7,p[1]-7,color,10);});};
+ const now=scoreMarkerCorners(1,2),active=s.stage===1?Math.min(3,Math.floor(s.phase*4)):2;
+ for(const u of [0,.35,.7]){c.save();c.globalAlpha=.24;drawCorners(scoreMarkerCorners(u,2),C.dim);c.restore();}
+ if(s.stage<2){
+  const observed=scoreMarkerCorners(1,2),predicted=scoreMarkerCorners(1,active);
+  drawCorners(observed,C.ink,2,[],true,true);
+  if(s.stage===0){for(let f=0;f<4;f++){c.save();c.globalAlpha=.55;drawCorners(scoreMarkerCorners(1,f),colors[f],1.5,[4,3]);c.restore();}}
+  else {scoreCornerResiduals(1,active).forEach(({observed,predicted})=>line(c,[observed,predicted],C.orange,2,[3,3]));drawCorners(predicted,colors[active],2,[5,3]);}
+  text(c,'Observed corners',48,407,C.ink,11);text(c,'Predicted corners',245,407,colors[active],11);
+  text(c,s.stage===0?'Four corners per image':'Match corner 1 → 1, 2 → 2, 3 → 3, 4 → 4',247,433,C.dim,11,'center');
+ }else{
+  const forecast=scoreMarkerCorners(1+.5*s.reveal,2);
+  drawCorners(now,C.ink,2,[],true,true);
+  now.forEach((p,i)=>arrow(c,p,forecast[i],C.green,1.5));
+  drawCorners(forecast,C.green,2.5,[5,3]);
+  text(c,'Observed now',48,407,C.ink,11);text(c,'Four forecast corners',281,407,C.green,11);
+  text(c,'One pixel displacement per corner',247,433,C.dim,11,'center');
+ }
  rect(c,485,184,248,263);text(c,s.stage===0?'Priors are possibilities':s.stage===1?'Observations set weights':'Forecast disturbance',503,214,C.ink,16);
- const rows=s.stage===0?['Add known motion patterns','Allow uncertain motion','Do not assume the true path']:s.stage===1?['Score motions within groups','Better fit, higher weight','Select the best fitting group']:['Extend motion in 3D','Project future pixel changes','Update with new images'];
+ const rows=s.stage===0?['Add known motion patterns','Allow uncertain motion','Do not assume the true path']:s.stage===1?['Sum four-corner residuals','Better fit, higher weight','Select the best fitting group']:['Extend motion in 3D','Project all four corners','Update with new images'];
  rows.forEach((r,i)=>{dot(c,506,246+i*37,3,i===2?C.green:C.blue);text(c,r,518,251+i*37,C.dim,12);});
- if(s.stage===1){for(let i=0;i<4;i++){const width=[38,68,166,50][i]*(.35+.65*clamp((s.time-8)/6));line(c,[[505,368+i*17],[505+width,368+i*17]],colors[i],5);}text(c,'Relative support · illustration',710,442,C.dim,10,'right');}
+ if(s.stage===1){for(let i=0;i<4;i++){const cost=scoreCornerCost(i),width=166/(1+cost/400)*(.35+.65*clamp((s.time-8)/6));line(c,[[505,368+i*17],[505+width,368+i*17]],colors[i],5);}text(c,'Relative support · illustration',710,442,C.dim,10,'right');}
  else {arrow(c,[535,378],[677,378],C.green,2);const x=535+142*((s.time*.23)%1);dot(c,x,378,5,C.green);text(c,s.stage===0?'Propose → observe':'Motion → pixel forecast',609,411,C.green,12,'center');}
  text(c,ESTIMATION_LESSONS[2].stages[s.stage].takeaway,380,482,C.ink,15,'center');text(c,'Motion prior groups can be extended. Scores shown here are illustrative.',380,509,C.dim,11,'center');
 }
