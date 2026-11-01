@@ -1,9 +1,9 @@
 // Chinese translations for the static project page.
 export default {
   // The three hero lines form one title. Translate them together in Chinese word order.
-  "A Novel": "面向机器人视觉伺服控制的",
+  "A Novel": "面向机器人视觉伺服的",
   "Disturbance Estimation Framework": "新型",
-  "for Robotic Visual Servoing Control": "扰动估计框架",
+  "for Robotic Visual Servoing": "扰动估计框架",
   "The approach": "核心思路",
   "Two estimates for visual servoing": "视觉伺服中的两类估计",
   "Estimate image disturbances": "估计图像扰动",
@@ -26,7 +26,7 @@ export default {
   "Download the 0.40 Hz comparison video.": "下载 0.40 Hz 对比视频。",
 
   "Explore RA-SDOB: real-to-sim-to-real image disturbance estimation and robot execution-response identification, explained through animations and an interactive simulation.": "通过分步动画和可交互的浏览器仿真，理解 RA-SDOB 如何结合空间重建与运动先验估计图像扰动，并识别机械臂的执行响应。",
-  "RA-SDOB: A Novel Disturbance Estimation Framework for Robotic Visual Servoing Control": "RA-SDOB：面向机器人视觉伺服控制的新型扰动估计框架",
+  "RA-SDOB: A Novel Disturbance Estimation Framework for Robotic Visual Servoing": "RA-SDOB：面向机器人视觉伺服的新型扰动估计框架",
   "Skip to the method": "跳到方法讲解",
   "RA-SDOB home": "RA-SDOB 首页",
   "Main navigation": "主导航",
