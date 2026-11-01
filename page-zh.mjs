@@ -1,9 +1,9 @@
 // Chinese translations for the static project page.
 export default {
   // The three hero lines form one title. Translate them together in Chinese word order.
-  "Image-Based Visual Servoing": "基于响应增强",
-  "with a Response-Augmented": "采样扰动观测器的",
-  "Sampling-Based Disturbance Observer": "图像视觉伺服",
+  "A Response-Augmented": "面向机器人视觉伺服的",
+  "Disturbance Estimation Framework": "响应增强",
+  "for Robotic Visual Servoing": "扰动估计框架",
   "The approach": "核心思路",
   "Two estimates for visual servoing": "视觉伺服中的两类估计",
   "Estimate image disturbances": "估计图像扰动",
@@ -26,7 +26,7 @@ export default {
   "Download the 0.40 Hz comparison video.": "下载 0.40 Hz 对比视频。",
 
   "Explore RA-SDOB: real-to-sim-to-real image disturbance estimation and robot execution-response identification, explained through animations and an interactive simulation.": "通过分步动画和可交互的浏览器仿真，理解 RA-SDOB 如何结合空间重建与运动先验估计图像扰动，并识别机械臂的执行响应。",
-  "Image-Based Visual Servoing with a Response-Augmented Sampling-Based Disturbance Observer": "基于响应增强采样扰动观测器的图像视觉伺服",
+  "RA-SDOB: A Response-Augmented Disturbance Estimation Framework for Robotic Visual Servoing": "RA-SDOB：面向机器人视觉伺服的响应增强扰动估计框架",
   "Skip to the method": "跳到方法讲解",
   "RA-SDOB home": "RA-SDOB 首页",
   "Main navigation": "主导航",
@@ -149,8 +149,6 @@ export default {
   "Reconstruct target motion in an auxiliary environment and combine sampled trajectories with motion priors. Learn how the arm responds to commands. Together, these estimates support predictive visual tracking.": "在辅助环境中重建目标运动，将随机轨迹采样与运动先验结合，并辨识机械臂对指令的实际响应。两类估计共同支持视觉跟踪中的预测与规划。",
   "Explore the method": "分步理解方法",
   "Run the simulation": "运行交互仿真",
-  "Image-Based Visual Servoing with a Response-Augmented": "基于响应增强采样扰动观测器的",
-  "Sampling-Based Disturbance Observer": "图像视觉伺服",
   "Two complementary estimates": "两类互补估计",
   "Understand the target.": "理解目标运动，",
   "Account for the robot.": "考虑机械臂响应。",
