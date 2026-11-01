@@ -1,8 +1,8 @@
-import {t,onLanguageChange,initializeLanguage} from './i18n.mjs?v=20261101title2';
-import {RECONSTRUCTION_DURATION,RECONSTRUCTION_STAGES,reconstructionState} from './reconstruction.mjs?v=20261101title2';
-import {Simulation,DEFAULTS,H} from './engine.mjs?v=20261101title2';
-import {drawLesson,drawImage,drawChart} from './draw.mjs?v=20261101title2';
-import {ESTIMATION_DURATION,ESTIMATION_LESSONS,estimationState} from './estimation-lessons.mjs?v=20261101title2';
+import {t,onLanguageChange,initializeLanguage} from './i18n.mjs?v=20261101title3';
+import {RECONSTRUCTION_DURATION,RECONSTRUCTION_STAGES,reconstructionState} from './reconstruction.mjs?v=20261101title3';
+import {Simulation,DEFAULTS,H} from './engine.mjs?v=20261101title3';
+import {drawLesson,drawImage,drawChart} from './draw.mjs?v=20261101title3';
+import {ESTIMATION_DURATION,ESTIMATION_LESSONS,estimationState} from './estimation-lessons.mjs?v=20261101title3';
 const $=id=>document.getElementById(id), $$=s=>[...document.querySelectorAll(s)];
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let labRobot=null;
@@ -235,7 +235,7 @@ function refreshModelCopy(){
 async function loadRobotView(){
  if(modelStarted)return;modelStarted=true;
  try {
-  const {createRobotView}=await import('./robot-view.mjs?v=20261101title2');
+  const {createRobotView}=await import('./robot-view.mjs?v=20261101title3');
   const canvas=$('world-canvas');
   canvas.addEventListener('webglcontextlost',()=>showModelFallback(new Error('WebGL context lost. Reload to restore the model.')),{once:true});
   labRobot=await createRobotView(canvas,{interactive:true,variant:'lab'});
