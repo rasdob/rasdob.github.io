@@ -1,6 +1,6 @@
-import pageChinese from './page-zh.mjs?v=20261101title4';
-import appChinese from './app-zh.mjs?v=20261101title4';
-import animationChinese from './animation-zh.mjs?v=20261101title4';
+import pageChinese from './page-zh.mjs?v=20261107response';
+import appChinese from './app-zh.mjs?v=20261107response';
+import animationChinese from './animation-zh.mjs?v=20261107response';
 
 const chinese = {...pageChinese, ...animationChinese, ...appChinese};
 const storageKey = 'ra-sdob-language';
