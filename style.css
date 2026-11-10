@@ -255,6 +255,10 @@ footer { display: flex; justify-content: flex-end; gap: 35px; padding: 35px 0 45
 .hardware-heading .eyebrow { font: 12px var(--mono); color: var(--blue); letter-spacing: .035em; }
 .hardware-heading h3 { margin: 14px 0; font-size: 32px; line-height: 1.25; letter-spacing: -.03em; }
 .hardware-heading p { font-size: 15px; color: var(--muted); }
+.hardware-case + .hardware-case { margin-top: 48px; }
+.hardware-case-heading { margin-bottom: 18px; max-width: 780px; }
+.hardware-case-heading h4 { margin: 0 0 10px; font-size: 23px; font-weight: 600; letter-spacing: -.02em; }
+.hardware-case-heading p { margin: 0; font-size: 14px; line-height: 1.7; color: var(--muted); }
 .hardware-video-list { display: grid; grid-template-columns: repeat(3, minmax(280px, 1fr)); gap: 18px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x proximity; overscroll-behavior-x: contain; }
 .hardware-video-list:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
 .hardware-video-card { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--panel-radius); background: #fff; scroll-snap-align: start; }

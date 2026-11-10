@@ -7,7 +7,7 @@
   <title>RA-SDOB: A Response-Augmented Disturbance Estimation Framework for Robotic Visual Servoing</title>
   <link rel="canonical" href="https://rasdob.github.io/">
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=20261107response">
+  <link rel="stylesheet" href="./style.css?v=20261110spatial">
 </head>
 <body>
 <a class="skip" href="#lesson">Skip to the method</a>
@@ -110,35 +110,64 @@
  <div id="evidence-circle" class="table-scroll" hidden><table><caption class="sr-only">Circular-motion disturbance estimation, RMSE in px/s, mean ± std</caption><thead><tr><th scope="col">Observer</th><th scope="col">0.16 Hz</th><th scope="col">0.28 Hz</th><th scope="col">0.40 Hz</th></tr></thead><tbody><tr><th scope="row">DOB · Gain 2</th><td>15.777 ± 0.013</td><td>40.071 ± 0.011</td><td>67.282 ± 0.011</td></tr><tr><th scope="row">DOB · Gain 5</th><td>7.731 ± 0.018</td><td>21.829 ± 0.010</td><td>41.619 ± 0.018</td></tr><tr><th scope="row">DOB · Gain 10</th><td>5.563 ± 0.060</td><td>13.189 ± 0.011</td><td>25.572 ± 0.026</td></tr><tr><th scope="row">DOB · Gain 20</th><td>6.298 ± 0.143</td><td>9.634 ± 0.083</td><td>16.671 ± 0.062</td></tr><tr><th scope="row">DOB · Gain 40</th><td>8.325 ± 0.233</td><td>9.652 ± 0.195</td><td>13.315 ± 0.152</td></tr><tr><th scope="row">SDOB</th><td>6.182 ± 0.108</td><td>6.865 ± 0.106</td><td>9.800 ± 0.216</td></tr><tr class="ours"><th scope="row">RA-SDOB</th><td class="best">1.996 ± 0.050</td><td class="best">1.851 ± 0.143</td><td class="best">1.787 ± 0.077</td></tr></tbody></table></div>
  <p class="evidence-note"><span class="best-key"></span> The lowest mean in each column is highlighted. Linear motion is scored over approximately the last 3.5, 1.5 and 0.75 s of the passes, in order of increasing speed, and circular motion over the final 16 s. RA-SDOB has the lowest mean in five of six conditions. DOB with gain 2 is slightly lower at 0.04 m/s. Linear speeds are rounded to two decimal places.</p></div>
  <section id="hardware-videos" class="hardware-section" aria-labelledby="hardware-heading">
-  <div class="hardware-heading"><span class="eyebrow">REAL-ROBOT TRACKING</span><h3 id="hardware-heading">Real-robot tracking comparison.</h3><p>Seven methods track a target moving in a circle on Astribot S1. The clips show separate trials aligned by elapsed time, from 4 to 24 s at normal speed.</p></div>
-  <div class="hardware-video-list" tabindex="0" role="region" aria-label="Real-robot videos ordered by increasing frequency">
+  <div class="hardware-heading"><span class="eyebrow">REAL-ROBOT TRACKING</span><h3 id="hardware-heading">Real-robot tracking comparison.</h3><p>Seven methods track planar and spatial target motion on Astribot S1. The clips show separate trials aligned by elapsed time, from 4 to 24 s at normal speed.</p></div>
+  <section class="hardware-case" aria-labelledby="hardware-planar-heading">
+  <div class="hardware-case-heading"><h4 id="hardware-planar-heading">Planar tracking</h4><p>A periodic planar path along an 8-cm-diameter circle.</p></div>
+  <div class="hardware-video-list" tabindex="0" role="region" aria-label="Planar tracking videos ordered by increasing frequency">
    <figure class="hardware-video-card">
-    <figcaption><strong>0.16 Hz</strong><span>Circular target motion · Seven methods</span></figcaption>
+    <figcaption><strong>0.16 Hz</strong><span>Planar target motion · Seven methods</span></figcaption>
     <video controls autoplay loop muted playsinline preload="auto" width="512" height="1122" poster="./assets/hardware-videos/comparison-016hz.jpg" aria-label="Seven-method real-robot tracking comparison at 0.16 Hz">
      <source src="./assets/hardware-videos/comparison-016hz.mp4" type="video/mp4">
      <p>Your browser does not support embedded video. <a href="./assets/hardware-videos/comparison-016hz.mp4">Download the 0.16 Hz comparison video.</a></p>
     </video>
    </figure>
    <figure class="hardware-video-card">
-    <figcaption><strong>0.28 Hz</strong><span>Circular target motion · Seven methods</span></figcaption>
+    <figcaption><strong>0.28 Hz</strong><span>Planar target motion · Seven methods</span></figcaption>
     <video controls autoplay loop muted playsinline preload="auto" width="512" height="1122" poster="./assets/hardware-videos/comparison-028hz.jpg" aria-label="Seven-method real-robot tracking comparison at 0.28 Hz">
      <source src="./assets/hardware-videos/comparison-028hz.mp4" type="video/mp4">
      <p>Your browser does not support embedded video. <a href="./assets/hardware-videos/comparison-028hz.mp4">Download the 0.28 Hz comparison video.</a></p>
     </video>
    </figure>
    <figure class="hardware-video-card">
-    <figcaption><strong>0.40 Hz</strong><span>Circular target motion · Seven methods</span></figcaption>
+    <figcaption><strong>0.40 Hz</strong><span>Planar target motion · Seven methods</span></figcaption>
     <video controls autoplay loop muted playsinline preload="auto" width="512" height="1122" poster="./assets/hardware-videos/comparison-040hz.jpg" aria-label="Seven-method real-robot tracking comparison at 0.40 Hz">
      <source src="./assets/hardware-videos/comparison-040hz.mp4" type="video/mp4">
      <p>Your browser does not support embedded video. <a href="./assets/hardware-videos/comparison-040hz.mp4">Download the 0.40 Hz comparison video.</a></p>
     </video>
    </figure>
   </div>
+  </section>
+  <section class="hardware-case" aria-labelledby="hardware-spatial-heading">
+  <div class="hardware-case-heading"><h4 id="hardware-spatial-heading">Spatial tracking</h4><p>A more complex spatial path with an 8-cm span along each axis. The x, y and z components have frequencies (f, 2f, f), where f is the base frequency shown below.</p></div>
+  <div class="hardware-video-list" tabindex="0" role="region" aria-label="Spatial tracking videos ordered by increasing base frequency">
+   <figure class="hardware-video-card">
+    <figcaption><strong>0.16 Hz</strong><span>Base frequency · Seven methods</span></figcaption>
+    <video controls autoplay loop muted playsinline preload="auto" width="512" height="1122" poster="./assets/hardware-videos/spatial-comparison-016hz.jpg" aria-label="Seven-method spatial tracking comparison at a base frequency of 0.16 Hz">
+     <source src="./assets/hardware-videos/spatial-comparison-016hz.mp4" type="video/mp4">
+     <p>Your browser does not support embedded video. <a href="./assets/hardware-videos/spatial-comparison-016hz.mp4">Download the 0.16 Hz spatial comparison video.</a></p>
+    </video>
+   </figure>
+   <figure class="hardware-video-card">
+    <figcaption><strong>0.28 Hz</strong><span>Base frequency · Seven methods</span></figcaption>
+    <video controls autoplay loop muted playsinline preload="auto" width="512" height="1122" poster="./assets/hardware-videos/spatial-comparison-028hz.jpg" aria-label="Seven-method spatial tracking comparison at a base frequency of 0.28 Hz">
+     <source src="./assets/hardware-videos/spatial-comparison-028hz.mp4" type="video/mp4">
+     <p>Your browser does not support embedded video. <a href="./assets/hardware-videos/spatial-comparison-028hz.mp4">Download the 0.28 Hz spatial comparison video.</a></p>
+    </video>
+   </figure>
+   <figure class="hardware-video-card">
+    <figcaption><strong>0.40 Hz</strong><span>Base frequency · Seven methods</span></figcaption>
+    <video controls autoplay loop muted playsinline preload="auto" width="512" height="1122" poster="./assets/hardware-videos/spatial-comparison-040hz.jpg" aria-label="Seven-method spatial tracking comparison at a base frequency of 0.40 Hz">
+     <source src="./assets/hardware-videos/spatial-comparison-040hz.mp4" type="video/mp4">
+     <p>Your browser does not support embedded video. <a href="./assets/hardware-videos/spatial-comparison-040hz.mp4">Download the 0.40 Hz spatial comparison video.</a></p>
+    </video>
+   </figure>
+  </div>
+  </section>
  </section>
 </section>
 </main>
 <footer class="wrap"><div class="references"><span>Page and model references</span><a href="https://supermimic.github.io/" target="_blank" rel="noopener">SuperMimic ↗</a><a href="./assets/astribot/README.md">Astribot S1 model notes ↗</a><a href="https://github.com/lagadic/visp" target="_blank" rel="noopener">ViSP ↗</a><a href="https://github.com/zalo/mujoco_wasm" target="_blank" rel="noopener">MuJoCo WASM ↗</a><a href="https://github.com/google-deepmind/mujoco_mpc" target="_blank" rel="noopener">MuJoCo MPC ↗</a><small>Layout inspired by SuperMimic. This page is independently implemented.</small></div></footer>
 <div id="toast" role="status" class="toast" hidden></div>
 <noscript><div class="noscript">Enable JavaScript for animations and simulation. Paper results and method descriptions remain available.</div></noscript>
-<script type="module" src="./app.mjs?v=20261107response"></script>
+<script type="module" src="./app.mjs?v=20261110spatial"></script>
 </body></html>

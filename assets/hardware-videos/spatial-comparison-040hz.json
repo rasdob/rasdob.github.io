@@ -1,0 +1,163 @@
+{
+  "file": "spatial-comparison-040hz.mp4",
+  "poster": "spatial-comparison-040hz.jpg",
+  "frame_index": "spatial-comparison-040hz.index.csv",
+  "frequency_hz": 0.4,
+  "width": 512,
+  "height": 1122,
+  "fps": 20,
+  "frames": 400,
+  "duration_s": 20.0,
+  "elapsed_start_s": 4.0,
+  "elapsed_end_exclusive_s": 24.0,
+  "playback_speed": 1,
+  "codec": "H.264",
+  "pixel_format": "yuv420p",
+  "fast_start": true,
+  "all_output_frames_decoded": true,
+  "crop_xyxy": [
+    200,
+    60,
+    440,
+    280
+  ],
+  "maximum_source_age_s": 0.08924061699945085,
+  "sources": [
+    {
+      "method": "pd",
+      "label": "PD",
+      "run_id": "20261109_022922_4aec6c",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/host_control/20261109_022922_4aec6c",
+      "files_sha256": {
+        "camera.avi": "3e2b7e87988e4eba744f3be0c90791d7890e6130a4cc60c4fcdbcb2129063a6c",
+        "video_index.csv": "6c75e357b5a49c98232329b4f1746b767390e83397d9ab9c52270570a2c78e19",
+        "config.json": "72c82b993d6a56cd5a4b33ab2f20b055574623fef6c90f0de3ef7e16e3d397db"
+      },
+      "source_frames": 478,
+      "first_elapsed_s": 0.00015494500985369086,
+      "last_elapsed_s": 23.984200835009688,
+      "all_source_frames_decoded": true
+    },
+    {
+      "method": "pd_dob",
+      "label": "PD+DOB",
+      "run_id": "20261109_022950_625cbe",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/host_control/20261109_022950_625cbe",
+      "files_sha256": {
+        "camera.avi": "82a9902658774daa3ecb094cd9401e1752d5a8f0d8b4f20ca7c7ce072f2d0cd7",
+        "video_index.csv": "f20eab3edb33581270d969bffd7c82a4a59865a0cae33b3eb43073b83d0945da",
+        "config.json": "172c670b2f59f9965386753c0bc35d82cedc77f6db7e4f01f6f3ecf9382afc19"
+      },
+      "source_frames": 478,
+      "first_elapsed_s": 0.0001697690022410825,
+      "last_elapsed_s": 24.033201832993655,
+      "all_source_frames_decoded": true
+    },
+    {
+      "method": "pd_sdob",
+      "label": "PD+SDOB",
+      "run_id": "20261109_023017_281203",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/host_control/20261109_023017_281203",
+      "files_sha256": {
+        "camera.avi": "121e8b7afc659a4b64fa1fe75a2f6022d74478fb16a97f08279fabb49d78aa61",
+        "video_index.csv": "b4b684d0bad46ade927eec96aa9783cf55b266f3d6f765799fcf0350f761e77e",
+        "config.json": "38ec9ea337df7285017e29030b9ff4d6df24e1924ec1646a904c649412a1c505"
+      },
+      "source_frames": 479,
+      "first_elapsed_s": 9.896000847220421e-05,
+      "last_elapsed_s": 23.984091996011557,
+      "all_source_frames_decoded": true
+    },
+    {
+      "method": "mpc",
+      "label": "MPC",
+      "run_id": "20261109_023045_5fd4e6",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/host_control/20261109_023045_5fd4e6",
+      "files_sha256": {
+        "camera.avi": "7f59ca502d284acf0ba263b41e67e0167c3fbcb990dd6ca964a713e500045692",
+        "video_index.csv": "db9b73a59bd1e904ac8c919c83c06c714ae8be2c32d4fd2f917547181032f0ed",
+        "config.json": "fde21b0dd7c639a94701926823bb4e0747dc4ecccdc945649e5a84b5f2cc8956"
+      },
+      "source_frames": 478,
+      "first_elapsed_s": 0.00022480799816548824,
+      "last_elapsed_s": 24.030113624001388,
+      "all_source_frames_decoded": true
+    },
+    {
+      "method": "dob_mpc",
+      "label": "MPC+DOB",
+      "run_id": "20261109_023113_f05b73",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/host_control/20261109_023113_f05b73",
+      "files_sha256": {
+        "camera.avi": "9324e14dabfbf6f40956a883d0a6371ed18f8e0ec3a4abca917584d924f4567a",
+        "video_index.csv": "a51ce4252babc53955b2eaacd0b6d9fdf2486f9e46034d59626db65065ff9b66",
+        "config.json": "a01915836618ffb4e92e5f5213562f1301fa2d4068fcb48e02c60cdf6f1d2eb5"
+      },
+      "source_frames": 478,
+      "first_elapsed_s": 9.698201029095799e-05,
+      "last_elapsed_s": 24.001174584002,
+      "all_source_frames_decoded": true
+    },
+    {
+      "method": "raw",
+      "label": "MPC+SDOB",
+      "run_id": "20261109_023144_968a1e",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/host_control/20261109_023144_968a1e",
+      "files_sha256": {
+        "camera.avi": "7b1a40c6c60de038f1e21ffaaa00b69632ffc57678e18d57e7d6e92ba10badad",
+        "video_index.csv": "0a454d4522db3c6e8946fef3646ec4ee8f10e45a9e544164beea1ab775aeb568",
+        "config.json": "9ae4b5a0718d692290f2c2666bfb61440dc1faa13530307ef093c5f9ff97fbb8"
+      },
+      "source_frames": 479,
+      "first_elapsed_s": 0.0009425400057807565,
+      "last_elapsed_s": 24.043921470001806,
+      "all_source_frames_decoded": true
+    },
+    {
+      "method": "adaptive",
+      "label": "MPC+RA-SDOB",
+      "run_id": "20261109_205325_974a48",
+      "repeat": 1,
+      "seed": 13,
+      "original_folder": "outputs/host_control/20261109_205325_974a48",
+      "files_sha256": {
+        "camera.avi": "ba10288ae6f4b855a2f7b9b5ed170ff91ce9225e563656066ea50605eb1f388a",
+        "video_index.csv": "3d8870697059cafda887ad59e95b3e36d181081ae75fc16399f774711f761370",
+        "config.json": "d033d0a3e61c6845043068ae43fec1221425a80f59e079e8c8260d8529b9bece"
+      },
+      "source_frames": 478,
+      "first_elapsed_s": 0.00019506100215949118,
+      "last_elapsed_s": 24.003790309012402,
+      "all_source_frames_decoded": true
+    }
+  ],
+  "files_sha256": {
+    "spatial-comparison-040hz.mp4": "30a846bd700bfbddb78e6f8324e6d5b8f64433868165b6733e3497ba828d2fc9",
+    "spatial-comparison-040hz.jpg": "04062116a8842675f57092601045563548631b59a7d396e42f0b1be0fa466789",
+    "spatial-comparison-040hz.index.csv": "0e3894e00e32b718cce8967ee8afae60fbb027a071d0369be42bf06355376daf"
+  },
+  "case": "spatial",
+  "full_span_xyz_m": [
+    0.08,
+    0.08,
+    0.08
+  ],
+  "component_frequencies_hz": [
+    0.4,
+    0.8,
+    0.4
+  ],
+  "target_orientation": "fixed"
+}
