@@ -1,4 +1,4 @@
-import {t} from './i18n.mjs?v=20261110simfix';
+import {t} from './i18n.mjs?v=20261110cleanview';
 /** Conceptual teaching scenes. No simulation results or measured scores are fabricated here. */
 export const ESTIMATION_DURATION=24;
 export const ESTIMATION_LESSONS={

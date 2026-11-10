@@ -1,4 +1,4 @@
-import {DEFAULTS} from './engine.mjs?v=20261110simfix';
+import {DEFAULTS} from './engine.mjs?v=20261110cleanview';
 
 export const ranges={frequency:[.08,.4],noise:[0,1.5],history:[.05,1.25],gain:[2,40]};
 export function validatedConfig(candidate={}){

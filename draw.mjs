@@ -1,7 +1,7 @@
-import {t} from './i18n.mjs?v=20261110simfix';
-import {drawReconstruction} from './reconstruction.mjs?v=20261110simfix';
-import {drawEstimationLesson} from './estimation-lessons.mjs?v=20261110simfix';
-import {project} from './engine.mjs?v=20261110simfix';
+import {t} from './i18n.mjs?v=20261110cleanview';
+import {drawReconstruction} from './reconstruction.mjs?v=20261110cleanview';
+import {drawEstimationLesson} from './estimation-lessons.mjs?v=20261110cleanview';
+import {project} from './engine.mjs?v=20261110cleanview';
 const palette={green:'#147d6c',orange:'#b56e18',blue:'#0071e3',ink:'#31343a',grid:'#dedee3',dim:'#6e6e73',light:'#ffffff',dark:'#f5f5f7',mint:'#147d6c',gold:'#b56e18',ice:'#0071e3'};
 const font='"Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif';
 function surface(canvas,w,h){
@@ -77,8 +77,6 @@ export function drawImage(canvas,sim){
  const markerSide=Math.hypot(r.clean[1][0]-r.clean[0][0],r.clean[1][1]-r.clean[0][1]);
  marker(c,...center,markerSide,0,.7);path(c,[...r.pixels,r.pixels[0]],'#147d6c',1.3);r.pixels.forEach(p=>circle(c,p,4,'#147d6c'));
  desired.forEach((p,i)=>line(c,p,r.pixels[i],'#a7b8c5',.7,[2,4]));
- if(sim.config.mode==='tracking'&&r.plan.length){path(c,[center,...r.plan],palette.gold,1.6,[4,5]);r.plan.filter((_,i)=>i%2===0).forEach(p=>circle(c,p,2.5,palette.gold));}
- if(r.planCorners?.length){const corners=r.planCorners.at(-1);path(c,[...corners,corners[0]],palette.gold,1.2,[4,5]);}
  if(r.depth)text(c,`${t('Depth')}: ${r.depth.toFixed(3)} m`,18,26,palette.dim,12);
  if(sim.config.mode==='estimate'){const end=[center[0]+r.estimated[0]*.35,center[1]+r.estimated[1]*.35];if(Math.hypot(...r.estimated)>1)arrow(c,center,end,palette.mint,2);}
  text(c,'u →',593,337,'#6e6e73',11);text(c,'v ↓',24,337,'#6e6e73',11);

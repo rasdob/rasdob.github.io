@@ -2,7 +2,7 @@
 // z away from the camera. Target orientation is fixed; depth is image-derived.
 import {H,FOCAL,DEPTH,SCALE,SIZE,MARKER_SIDE,DEFAULTS,clamp,norm,random,
   responseStep,regression,accelerationPath,scoreFamilies,selectFamily,
-  RecursiveSDOB,ResponseIdentifier,projectCommands} from './engine.mjs?v=20261110simfix';
+  RecursiveSDOB,ResponseIdentifier,projectCommands} from './engine.mjs?v=20261110cleanview';
 
 const zeroCorners=()=>Array.from({length:4},()=>[0,0]);
 const meanCorners=c=>[0,1].map(d=>c.reduce((s,p)=>s+p[d]/4,0));

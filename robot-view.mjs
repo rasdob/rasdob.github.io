@@ -1,8 +1,8 @@
-import {identity,multiply,transform,point,vector,normalize,cross,dot,sub,forwardKinematics,solveRightArm,sceneFrame,planarPosition} from './robot-kinematics.mjs?v=20261110simfix';
-import {decodeModelGeometry} from './model-codec.mjs?v=20261110simfix';
-import {MARKER_SIDE,DEPTH} from './engine.mjs?v=20261110simfix';
+import {identity,multiply,transform,point,vector,normalize,cross,dot,sub,forwardKinematics,solveRightArm,sceneFrame,planarPosition} from './robot-kinematics.mjs?v=20261110cleanview';
+import {decodeModelGeometry} from './model-codec.mjs?v=20261110cleanview';
+import {MARKER_SIDE,DEPTH} from './engine.mjs?v=20261110cleanview';
 
-const MODEL_URL=new URL('./assets/astribot/model.json?v=20261110simfix',import.meta.url);
+const MODEL_URL=new URL('./assets/astribot/model.json?v=20261110cleanview',import.meta.url);
 let sharedAssets;
 let assetProgress={phase:'metadata',loaded:0,total:1,ratio:0};
 const progressListeners=new Set();
