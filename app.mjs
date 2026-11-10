@@ -1,10 +1,10 @@
-import {t,onLanguageChange,initializeLanguage} from './i18n.mjs?v=20261110sim3d';
-import {RECONSTRUCTION_DURATION,RECONSTRUCTION_STAGES,reconstructionState} from './reconstruction.mjs?v=20261110sim3d';
-import {Simulation,DEFAULTS,H} from './engine.mjs?v=20261110sim3d';
-import {SpatialSimulation} from './spatial-engine.mjs?v=20261110sim3d';
-import {ranges,validatedConfig} from './lab-config.mjs?v=20261110sim3d';
-import {drawLesson,drawImage,drawChart} from './draw.mjs?v=20261110sim3d';
-import {ESTIMATION_DURATION,ESTIMATION_LESSONS,estimationState} from './estimation-lessons.mjs?v=20261110sim3d';
+import {t,onLanguageChange,initializeLanguage} from './i18n.mjs?v=20261110simfix';
+import {RECONSTRUCTION_DURATION,RECONSTRUCTION_STAGES,reconstructionState} from './reconstruction.mjs?v=20261110simfix';
+import {Simulation,DEFAULTS,H} from './engine.mjs?v=20261110simfix';
+import {SpatialSimulation} from './spatial-engine.mjs?v=20261110simfix';
+import {ranges,validatedConfig} from './lab-config.mjs?v=20261110simfix';
+import {drawLesson,drawImage,drawChart} from './draw.mjs?v=20261110simfix';
+import {ESTIMATION_DURATION,ESTIMATION_LESSONS,estimationState} from './estimation-lessons.mjs?v=20261110simfix';
 const $=id=>document.getElementById(id), $$=s=>[...document.querySelectorAll(s)];
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let labRobot=null;
@@ -233,7 +233,7 @@ function refreshModelCopy(){
 async function loadRobotView(){
  if(modelStarted)return;modelStarted=true;
  try {
-  const {createRobotView}=await import('./robot-view.mjs?v=20261110sim3d');
+  const {createRobotView}=await import('./robot-view.mjs?v=20261110simfix');
   const canvas=$('world-canvas');
   canvas.addEventListener('webglcontextlost',()=>showModelFallback(new Error('WebGL context lost. Reload to restore the model.')),{once:true});
   labRobot=await createRobotView(canvas,{interactive:true,variant:'lab'});

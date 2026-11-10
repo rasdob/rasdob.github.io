@@ -2,7 +2,7 @@
 // z away from the camera. Target orientation is fixed; depth is image-derived.
 import {H,FOCAL,DEPTH,SCALE,SIZE,MARKER_SIDE,DEFAULTS,clamp,norm,random,
   responseStep,regression,accelerationPath,scoreFamilies,selectFamily,
-  RecursiveSDOB,ResponseIdentifier,projectCommands} from './engine.mjs?v=20261110sim3d';
+  RecursiveSDOB,ResponseIdentifier,projectCommands} from './engine.mjs?v=20261110simfix';
 
 const zeroCorners=()=>Array.from({length:4},()=>[0,0]);
 const meanCorners=c=>[0,1].map(d=>c.reduce((s,p)=>s+p[d]/4,0));
@@ -10,6 +10,13 @@ const cornerError=(a,b)=>Math.sqrt(a.reduce((s,p,i)=>s+p.reduce((v,x,d)=>v+(x-b[
 const offsets=[[-1,-1],[1,-1],[1,1],[-1,1]].map(p=>p.map(x=>x*MARKER_SIDE/2));
 const dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);
 const add=(a,b)=>a.map((x,i)=>x+b[i]);
+
+// Common command bounds for every controller in the spatial teaching model.
+// At f=.40 Hz, the y component is .80 Hz. With the nominal plant response,
+// following its 4-cm amplitude needs about .34 m/s and .085 m/s per step.
+// The planar bounds (.30/.04) made that task infeasible and caused saturation.
+// These are browser-model settings, not limits for the physical robot.
+export const SPATIAL_COMMAND_LIMITS=Object.freeze({speed:.4,step:.1});
 
 export function projectSpatial(center,camera=[0,0,0]){
   const depth=DEPTH+center[2]-camera[2];
@@ -98,6 +105,10 @@ export class SpatialCandidateObserver {
             frequency=.01+1.19*this.rng.uniform();
             if(mass>1e-100){let u=this.rng.uniform()*mass,pick=previous.at(-1);for(const c of previous){u-=c.weight;if(u<=0){pick=c;break;}}frequency=clamp(pick.frequency+.012*this.rng.normal(),.01,1.2);}
           }
+          // Retain one previously supported frequency per branch. Redrawing
+          // every proposal could lose a good measured fit for a single frame.
+          // Coefficients are refitted and scored again; global proposals remain.
+          if(j===grid&&mass>1e-100)frequency=previous.reduce((best,c)=>c.weight>best.weight?c:best).frequency;
           const w=2*Math.PI*frequency,basis=t=>[1,...Array.from({length:harmonics},(_,i)=>[Math.cos((i+1)*w*t)-1,Math.sin((i+1)*w*t)]).flat()];
           const fit=regression(pt.map(basis),periodic.map(r=>r.center),pw,1e-5);
           const c={family:2,p:fit.map(b=>b[0]),fit,frequency,harmonics};
@@ -207,11 +218,12 @@ export class SpatialController {
       }
       return {value,gradient,predictions};
     };
-    let u=this.warm.map((axis,d)=>projectCommands([...axis.slice(1),axis.at(-1)],previous[d])),step=1;
+    const project=(axis,d)=>projectCommands(axis,previous[d],SPATIAL_COMMAND_LIMITS.speed,SPATIAL_COMMAND_LIMITS.step);
+    let u=this.warm.map((axis,d)=>project([...axis.slice(1),axis.at(-1)],d)),step=1;
     for(let iteration=0;iteration<55;iteration++){
       const {value,gradient}=evaluate(u);let candidate,accepted=false;
       for(let trial=0;trial<12;trial++){
-        candidate=u.map((axis,d)=>projectCommands(axis.map((x,j)=>x-step*gradient[d][j]),previous[d]));
+        candidate=u.map((axis,d)=>project(axis.map((x,j)=>x-step*gradient[d][j]),d));
         if(evaluate(candidate,false).value<=value+1e-12){accepted=true;break;}step*=.5;
       }
       if(!accepted)break;
