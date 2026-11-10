@@ -1,8 +1,10 @@
-import {t,onLanguageChange,initializeLanguage} from './i18n.mjs?v=20261110spatial';
-import {RECONSTRUCTION_DURATION,RECONSTRUCTION_STAGES,reconstructionState} from './reconstruction.mjs?v=20261110spatial';
-import {Simulation,DEFAULTS,H} from './engine.mjs?v=20261110spatial';
-import {drawLesson,drawImage,drawChart} from './draw.mjs?v=20261110spatial';
-import {ESTIMATION_DURATION,ESTIMATION_LESSONS,estimationState} from './estimation-lessons.mjs?v=20261110spatial';
+import {t,onLanguageChange,initializeLanguage} from './i18n.mjs?v=20261110sim3d';
+import {RECONSTRUCTION_DURATION,RECONSTRUCTION_STAGES,reconstructionState} from './reconstruction.mjs?v=20261110sim3d';
+import {Simulation,DEFAULTS,H} from './engine.mjs?v=20261110sim3d';
+import {SpatialSimulation} from './spatial-engine.mjs?v=20261110sim3d';
+import {ranges,validatedConfig} from './lab-config.mjs?v=20261110sim3d';
+import {drawLesson,drawImage,drawChart} from './draw.mjs?v=20261110sim3d';
+import {ESTIMATION_DURATION,ESTIMATION_LESSONS,estimationState} from './estimation-lessons.mjs?v=20261110sim3d';
 const $=id=>document.getElementById(id), $$=s=>[...document.querySelectorAll(s)];
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let labRobot=null;
@@ -139,19 +141,10 @@ selectLesson(new URLSearchParams(location.search).get('lesson')==='reconstructio
 
 $$('[data-lesson-link]').forEach(link=>link.addEventListener('click',()=>selectLesson(Number(link.dataset.lessonLink))));
 
-const ranges={frequency:[.08,.4],noise:[0,1.5],history:[.05,1.25],gain:[2,40]};
 let playing=false,simulation,chartKind='tracking',accumulator=0,lastFrame=0,lastUI=0,lastLessonFrame=0,toastTimer;
-function validatedConfig(candidate){
- const c={...DEFAULTS,mode:'tracking',motion:'circle'};
- for(const [key,[low,high]] of Object.entries(ranges)){const v=Number(candidate[key]);if(Number.isFinite(v))c[key]=Math.min(high,Math.max(low,v));}
- c.gain=Math.round(c.gain);
- if(['ra','sdob','dob','mpc'].includes(candidate.method))c.method=candidate.method;
- if(c.method==='sdob')c.history=.05;
- c.counts=c.method==='sdob'?[0,0,0,DEFAULTS.counts[3]]:[...DEFAULTS.counts];c.weighting=c.method==='sdob'?'global':'grouped';return c;
-}
-function readConfig(){const c={method:$('method').value};for(const key of Object.keys(ranges))c[key]=$(key).value;return validatedConfig(c);}
+function readConfig(){const c={method:$('method').value,motion:$('motion').value};for(const key of Object.keys(ranges))c[key]=$(key).value;return validatedConfig(c);}
 function applyConfig(c){
- c=validatedConfig(c);for(const key of Object.keys(ranges))$(key).value=c[key];$('method').value=c.method;syncControls();
+ c=validatedConfig(c);for(const key of Object.keys(ranges))$(key).value=c[key];$('method').value=c.method;$('motion').value=c.motion;syncControls();
 }
 function syncControls(){
  $('history').disabled=$('method').value==='sdob';
@@ -163,10 +156,13 @@ let toastMessage='';
 function toast(message){toastMessage=message;$('toast').textContent=t(message);$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,4200);}
 function pause(){playing=false;$('play').textContent=t(simulation&&simulation.t>=24?'↺ Run again':'▶ Resume');}
 function resetSimulation(showMessage=false){
- pause();simulation=new Simulation(readConfig());accumulator=0;$('play').textContent=t('▶ Start simulation');
+ pause();const config=readConfig();simulation=config.motion==='spatial'?new SpatialSimulation(config):new Simulation(config);accumulator=0;$('play').textContent=t('▶ Start simulation');
+ const spatial=config.motion==='spatial';$('depth-chart').hidden=!spatial;
+ if(!spatial&&chartKind==='depth')chartKind='tracking';
+ $$('[data-chart]').forEach(b=>{b.classList.toggle('active',b.dataset.chart===chartKind);b.setAttribute('aria-pressed',String(b.dataset.chart===chartKind));});
  refreshChartCopy();render(true);if(showMessage)toast('Settings updated and simulation reset. Press Start to run.');
 }
-for(const key of [...Object.keys(ranges),'method']){
+for(const key of [...Object.keys(ranges),'method','motion']){
  $(key).addEventListener('input',syncControls);
  $(key).addEventListener('change',()=>{
   if(key==='method')$('history').value=$('method').value==='sdob'?.05:DEFAULTS.history;
@@ -183,15 +179,17 @@ $$('[data-chart]').forEach(b=>b.onclick=()=>{
  render(true);
 });
 function refreshChartCopy(){
- const titles={x:'Target disturbance · horizontal',y:'Target disturbance · vertical',error:'Current disturbance estimation error',tracking:'Corner tracking error'};
+ const titles={x:'Target disturbance · horizontal',y:'Target disturbance · vertical',error:'Current disturbance estimation error',tracking:'Corner tracking error',depth:'Image-derived relative depth'};
  $('chart-title').textContent=t(titles[chartKind]);
  $('chart-legend').innerHTML=chartKind==='tracking'?`<span><i style="--dot:#147d6c"></i>${t('Corner RMSE')}</span>`:`${chartKind==='error'?'':`<span><i style="--dot:#697785"></i>${t('Ground truth (evaluation only)')}</span>`}<span><i style="--dot:#147d6c"></i>${simulation.config.method==='sdob'?'SDOB':'RA-SDOB'}</span><span><i style="--dot:#b56e18"></i>DOB</span>`;
+ if(chartKind==='depth')$('chart-legend').innerHTML=`<span><i style="--dot:#147d6c"></i>${t('Image-derived depth')}</span><span><i style="--dot:#697785"></i>${t('Desired depth')}</span>`;
 }
 function render(force=false){
  if(!simulation)return;const r=simulation.latest;
  labRobot?.render({time:simulation.t,camera:r.camera,target:r.target,mode:simulation.config.mode,candidates:simulation.observer.candidates.slice().sort((a,b)=>b.weight-a.weight).slice(0,6).map(candidate=>Array.from({length:16},(_,n)=>simulation.observer.position(candidate,n*.025)))});drawImage($('image-canvas'),simulation);drawChart($('chart-canvas'),simulation,chartKind);
  $('sim-progress').style.width=`${simulation.t/24*100}%`;
  $('visibility').textContent=t(r.visible?'Features visible':'Features out of view');$('visibility').style.color=r.visible?'':'#e3af77';
+ $('motion-description').textContent=t(simulation.config.motion==='spatial'?'Spatial: 8 cm along each axis; x, y, z frequencies (f, 2f, f).':'Planar: 8 cm diameter; fixed target depth.');
  const insufficient=simulation.config.counts[2]>0&&simulation.config.counts[0]===0&&simulation.config.counts[1]===0&&!(simulation.config.counts[3]>0)&&simulation.config.history<.2;
  const hint=insufficient?'Circular fitting needs at least 5 frames. Set the observation window to 0.20 s or longer.':!r.visible?'The target is outside the field of view. Feature observations are paused. Reduce the motion frequency.':simulation.t===0?'Press Start. The target begins moving immediately.':'Every 0.05 s, update estimates, plan ahead and apply the first command.';
  $('experiment-hint').textContent=t(hint);
@@ -235,7 +233,7 @@ function refreshModelCopy(){
 async function loadRobotView(){
  if(modelStarted)return;modelStarted=true;
  try {
-  const {createRobotView}=await import('./robot-view.mjs?v=20261110spatial');
+  const {createRobotView}=await import('./robot-view.mjs?v=20261110sim3d');
   const canvas=$('world-canvas');
   canvas.addEventListener('webglcontextlost',()=>showModelFallback(new Error('WebGL context lost. Reload to restore the model.')),{once:true});
   labRobot=await createRobotView(canvas,{interactive:true,variant:'lab'});

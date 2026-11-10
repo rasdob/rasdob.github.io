@@ -52,16 +52,17 @@ function solve(matrix,rhs) {
   }
   return a.map(r=>r[n]);
 }
-function regression(basis,positions,weights,ridge=1e-8) {
+export function regression(basis,positions,weights,ridge=1e-8) {
   const n=basis[0].length, gram=Array.from({length:n},()=>zeros(n));
   for(let i=0;i<n;i++)for(let j=0;j<n;j++)gram[i][j]=basis.reduce((s,b,k)=>s+weights[k]*b[i]*b[j],0)+(i===j&&i>0?ridge:0);
-  return [0,1].map(d=>solve(gram,basis[0].map((_,i)=>basis.reduce((s,b,k)=>s+weights[k]*b[i]*positions[k][d],0))));
+  return positions[0].map((_,d)=>solve(gram,basis[0].map((_,i)=>basis.reduce((s,b,k)=>s+weights[k]*b[i]*positions[k][d],0))));
 }
 // Exact integration of linearly interpolated acceleration, anchored at t=0.
-// This is a planar teaching approximation, not the paper's 3-D replay engine.
+// Shared by the planar and spatial teaching models.
 export function accelerationPath(knots, acceleration) {
-  if(knots.length<2||knots.length!==acceleration.length||knots.some((t,i)=>!Number.isFinite(t)||(i&&t<=knots[i-1]))||knots[0]>0||knots.at(-1)<0||acceleration.some(a=>a.length!==2||!a.every(Number.isFinite)))throw new Error('Invalid acceleration knots');
-  const states=[{p:[0,0],v:[0,0]}],jerks=[];
+  const dimensions=acceleration[0]?.length;
+  if(![2,3].includes(dimensions)||knots.length<2||knots.length!==acceleration.length||knots.some((t,i)=>!Number.isFinite(t)||(i&&t<=knots[i-1]))||knots[0]>0||knots.at(-1)<0||acceleration.some(a=>a.length!==dimensions||!a.every(Number.isFinite)))throw new Error('Invalid acceleration knots');
+  const states=[{p:zeros(dimensions),v:zeros(dimensions)}],jerks=[];
   for(let i=0;i<knots.length-1;i++){
     const h=knots[i+1]-knots[i],j=acceleration[i].map((x,d)=>(acceleration[i+1][d]-x)/h),old=states[i];jerks.push(j);
     states.push({p:old.p.map((x,d)=>x+h*old.v[d]+h*h*acceleration[i][d]/2+h**3*j[d]/6),v:old.v.map((x,d)=>x+h*acceleration[i][d]+h*h*j[d]/2)});
@@ -223,19 +224,19 @@ export class RecursiveSDOB {
     const previous=this.history.at(-1);
     this.history=[...(previous?[previous]:[]),record];
     // This reconstructed center is a drawing adapter only, never a score input.
-    this.center=[0,1].map(d=>(pixels.reduce((s,p)=>s+p[d],0)/4-SIZE[d]/2)/SCALE+camera[d]);
+    this.center=this.reconstruct(pixels,camera);
     if(!previous)return;
     const dt=time-previous.time;
     if(!(dt>0))throw new RangeError('Observation times must increase');
     // Missing observations cannot be scored as a nominal 0.05-second transition.
     if(Math.abs(dt-H)>1e-8){this.candidates=[];this.ready=false;this.family=[0,0,0,0];this.familyCounts=[0,0,0,0];this.familyScores=Array(4).fill(Infinity);return;}
-    const cameraDelta=camera.map((x,d)=>-SCALE*(x-previous.camera[d]));
+    const cameraDelta=this.cameraDisplacement(previous,camera);
     const candidates=[];
     for(let j=0;j<500;j++){
       const perturbation=Array.from({length:4},()=>[10*this.rng.normal(),10*this.rng.normal()]);
       for(const sign of [1,-1]){
         const disturbance=this.disturbance.map((p,i)=>p.map((x,d)=>x+sign*perturbation[i][d]));
-        const predicted=previous.pixels.map((p,i)=>p.map((x,d)=>x+cameraDelta[d]+dt*disturbance[i][d]));
+        const predicted=previous.pixels.map((p,i)=>p.map((x,d)=>x+cameraDelta[i][d]+dt*disturbance[i][d]));
         const cost=predicted.reduce((sum,p,i)=>sum+p.reduce((s,x,d)=>s+(x-pixels[i][d])**2,0),0)/4;
         candidates.push({family:3,disturbance,predicted,cost,valid:true});
       }
@@ -257,6 +258,9 @@ export class RecursiveSDOB {
     this.candidates=candidates;this.family=[0,0,0,1];this.familyCounts=[0,0,0,1000];this.ready=true;
     this.familyScores=[Infinity,Infinity,Infinity,candidates.reduce((s,c)=>s+c.weight*c.cost,0)];
   }
+  reconstruct(pixels,camera){return [0,1].map(d=>(pixels.reduce((s,p)=>s+p[d],0)/4-SIZE[d]/2)/SCALE+camera[d]);}
+  cameraDisplacement(previous,camera){return Array.from({length:4},()=>camera.map((x,d)=>-SCALE*(x-previous.camera[d])));}
+  currentCorners(){return this.disturbance.map(p=>p.slice());}
   // The planar teaching controller uses the mean of the four corner estimates.
   // Keep the separate corner disturbances above; no rigid-motion fit is applied.
   current(){return [0,1].map(d=>this.disturbance.reduce((sum,p)=>sum+p[d],0)/4);}
@@ -283,7 +287,7 @@ export class ResponseIdentifier {
     for(let j=0;j<81;j++){
       const tau=.015*Math.pow(.4/.015,j/80),a=Math.exp(-H/tau),b=tau*(1-a)/H;
       const pairs=[];let numerator=0,denominator=0;
-      for(let k=2;k<r.length;k++)for(let d=0;d<2;d++){
+      for(let k=2;k<r.length;k++)for(let d=0;d<q.length;d++){
         const y=(r[k].q[d]-r[k-1].q[d])/H-a*(r[k-1].q[d]-r[k-2].q[d])/H;
         const x=(1-b)*r[k].command[d]+(b-a)*r[k-1].command[d],w=Math.exp((r[k].time-time)/.6);
         pairs.push([x,y,w]);numerator+=w*x*y;denominator+=w*x*x;
@@ -294,7 +298,7 @@ export class ResponseIdentifier {
     }
     if(Number.isFinite(best.cost)){Object.assign(this,best);this.identified=true;}
   }
-  endpoint(){const r=this.history,n=r.length;if(n<2)return [0,0];const a=Math.exp(-H/this.tau),b=this.tau*(1-a)/H;return r[n-1].q.map((x,d)=>a/b*(x-r[n-2].q[d])/H+this.gain*(1-a/b)*r[n-1].command[d]);}
+  endpoint(){const r=this.history,n=r.length;if(n<2)return r[0]?.q.map(()=>0)||[0,0];const a=Math.exp(-H/this.tau),b=this.tau*(1-a)/H;return r[n-1].q.map((x,d)=>a/b*(x-r[n-2].q[d])/H+this.gain*(1-a/b)*r[n-1].command[d]);}
 }
 // Projection onto speed and successive-command bounds. Repeated pairwise
 // projections followed by a causal pass ensure a feasible returned sequence.
@@ -375,7 +379,8 @@ export class Simulation {
     if(this.config.mode==='estimate')command=[.018*Math.sin(1.7*this.t),.012*Math.sin(2.3*this.t)];
     else if(visible){
       const adaptive=this.config.method==='ra',tau=adaptive?this.response.tau:.06,gain=adaptive?this.response.gain:1;
-      const forecast=this.config.method==='mpc'?Array.from({length:this.config.horizon},()=>[0,0]):this.config.method==='dob'?Array.from({length:this.config.horizon},()=>dob):this.observer.forecast(this.config.horizon);
+      const short=this.config.method==='mpc'?[[0,0]]:this.config.method==='dob'?[dob]:this.observer.forecast(Math.min(4,this.config.horizon));
+      const forecast=Array.from({length:this.config.horizon},(_,k)=>short[Math.min(k,short.length-1)].slice());
       const records=this.response.history,interval=records.length>1?qMeasured.map((x,d)=>(x-records.at(-2).q[d])/H):[0,0];
       const a=Math.exp(-H/tau),b=tau*(1-a)/H,endpoint=interval.map((x,d)=>a/b*x+gain*(1-a/b)*this.command[d]);
       command=this.mpc.command(error,endpoint,forecast,tau,gain,this.command);

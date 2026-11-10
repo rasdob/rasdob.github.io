@@ -66,5 +66,6 @@ export function sceneFrame(model){
   return {origin:point(m),right:normalize(vector(m,[1,0,0])),up:normalize(vector(m,[0,1,0])),forward:normalize(vector(m,[0,0,-1]))};
 }
 export function planarPosition(frame,offset=[0,0],depth=0){
-  return frame.origin.map((v,i)=>v+frame.right[i]*(offset[0]||0)-frame.up[i]*(offset[1]||0)+frame.forward[i]*depth);
+  // Accept the spatial mode's optical-axis offset while retaining the planar API.
+  return frame.origin.map((v,i)=>v+frame.right[i]*(offset[0]||0)-frame.up[i]*(offset[1]||0)+frame.forward[i]*(depth+(offset[2]||0)));
 }

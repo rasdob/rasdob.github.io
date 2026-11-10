@@ -1,7 +1,7 @@
-import {t} from './i18n.mjs?v=20261110spatial';
-import {drawReconstruction} from './reconstruction.mjs?v=20261110spatial';
-import {drawEstimationLesson} from './estimation-lessons.mjs?v=20261110spatial';
-import {project} from './engine.mjs?v=20261110spatial';
+import {t} from './i18n.mjs?v=20261110sim3d';
+import {drawReconstruction} from './reconstruction.mjs?v=20261110sim3d';
+import {drawEstimationLesson} from './estimation-lessons.mjs?v=20261110sim3d';
+import {project} from './engine.mjs?v=20261110sim3d';
 const palette={green:'#147d6c',orange:'#b56e18',blue:'#0071e3',ink:'#31343a',grid:'#dedee3',dim:'#6e6e73',light:'#ffffff',dark:'#f5f5f7',mint:'#147d6c',gold:'#b56e18',ice:'#0071e3'};
 const font='"Noto Sans CJK SC","Microsoft YaHei",system-ui,sans-serif';
 function surface(canvas,w,h){
@@ -78,6 +78,8 @@ export function drawImage(canvas,sim){
  marker(c,...center,markerSide,0,.7);path(c,[...r.pixels,r.pixels[0]],'#147d6c',1.3);r.pixels.forEach(p=>circle(c,p,4,'#147d6c'));
  desired.forEach((p,i)=>line(c,p,r.pixels[i],'#a7b8c5',.7,[2,4]));
  if(sim.config.mode==='tracking'&&r.plan.length){path(c,[center,...r.plan],palette.gold,1.6,[4,5]);r.plan.filter((_,i)=>i%2===0).forEach(p=>circle(c,p,2.5,palette.gold));}
+ if(r.planCorners?.length){const corners=r.planCorners.at(-1);path(c,[...corners,corners[0]],palette.gold,1.2,[4,5]);}
+ if(r.depth)text(c,`${t('Depth')}: ${r.depth.toFixed(3)} m`,18,26,palette.dim,12);
  if(sim.config.mode==='estimate'){const end=[center[0]+r.estimated[0]*.35,center[1]+r.estimated[1]*.35];if(Math.hypot(...r.estimated)>1)arrow(c,center,end,palette.mint,2);}
  text(c,'u →',593,337,'#6e6e73',11);text(c,'v ↓',24,337,'#6e6e73',11);
  if(!r.visible){box(c,145,143,350,65,'#fff0e9','#c99a7c',4);text(c,'Target out of view: observations paused',320,181,'#9d4820',17,'center');}
@@ -87,14 +89,16 @@ export function drawChart(canvas,sim,kind='x'){
  const c=surface(canvas,1000,230);if(!c)return;const left=60,right=975,top=30,bottom=192,w=right-left,h=bottom-top;
  const records=sim.records;let series,labels;
  if(kind==='tracking'){series=[records.map(r=>[r.t,r.tracking])];labels=[palette.mint];}
+ else if(kind==='depth'){series=[records.map(r=>[r.t,r.depth]),records.map(r=>[r.t,r.desiredDepth])];labels=[palette.mint,'#697785'];}
  else if(kind==='error'){series=[records.map(r=>[r.t,r.estimateError]),records.map(r=>[r.t,r.dobError])];labels=[palette.mint,palette.gold];}
  else {const d=kind==='x'?0:1;series=[records.map(r=>[r.t,r.truth[d]]),records.map(r=>[r.t,r.estimated[d]]),records.map(r=>[r.t,r.dob[d]])];labels=['#697785',palette.mint,palette.gold];}
  const values=series.flat().map(p=>p[1]).filter(Number.isFinite);let min=kind==='error'||kind==='tracking'?0:Math.min(-10,...values),max=Math.max(10,...values);
+ if(kind==='depth'){min=Math.min(.56,...values);max=Math.max(.60,...values);}
  const padding=(max-min)*.13;max+=padding;if(min<0)min-=padding;
  const point=([t,v])=>[left+t/24*w,bottom-(v-min)/(max-min)*h];
- for(let i=0;i<=4;i++){const v=min+(max-min)*i/4,y=point([0,v])[1];line(c,[left,y],[right,y],'#e0e4e9',.7);text(c,v.toFixed(Math.abs(v)>99?0:1),left-12,y+4,'#6e6e73',10,'right');}
+ for(let i=0;i<=4;i++){const v=min+(max-min)*i/4,y=point([0,v])[1];line(c,[left,y],[right,y],'#e0e4e9',.7);text(c,v.toFixed(kind==='depth'?3:Math.abs(v)>99?0:1),left-12,y+4,'#6e6e73',10,'right');}
  for(let t=0;t<=24;t+=4){const x=point([t,0])[0];line(c,[x,top],[x,bottom],'#e8ebef',.7);text(c,String(t),x,bottom+20,'#6e6e73',10,'center');}
- series.forEach((s,i)=>path(c,s.map(point),labels[i],i===0&&series.length===3?1.6:2,i===0&&series.length===3?[5,5]:[]));
- text(c,kind==='tracking'?'px':'px/s',left,16,'#6e6e73',10);text(c,'Time (s)',(left+right)/2,bottom+35,'#6e6e73',10,'center');
+ series.forEach((s,i)=>path(c,s.map(point),labels[i],i===0&&series.length===3?1.6:2,i===0&&series.length===3||kind==='depth'&&i===1?[5,5]:[]));
+ text(c,kind==='tracking'?'px':kind==='depth'?'m':'px/s',left,16,'#6e6e73',10);text(c,'Time (s)',(left+right)/2,bottom+35,'#6e6e73',10,'center');
  const x=point([sim.t,0])[0];line(c,[x,top],[x,bottom],'#939da9',.8);
 }

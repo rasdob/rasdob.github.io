@@ -1,8 +1,8 @@
-import {identity,multiply,transform,point,vector,normalize,cross,dot,sub,forwardKinematics,solveRightArm,sceneFrame,planarPosition} from './robot-kinematics.mjs';
-import {decodeModelGeometry} from './model-codec.mjs?v=20261110spatial';
-import {MARKER_SIDE,DEPTH} from './engine.mjs?v=20261110spatial';
+import {identity,multiply,transform,point,vector,normalize,cross,dot,sub,forwardKinematics,solveRightArm,sceneFrame,planarPosition} from './robot-kinematics.mjs?v=20261110sim3d';
+import {decodeModelGeometry} from './model-codec.mjs?v=20261110sim3d';
+import {MARKER_SIDE,DEPTH} from './engine.mjs?v=20261110sim3d';
 
-const MODEL_URL=new URL('./assets/astribot/model.json?v=20261110spatial',import.meta.url);
+const MODEL_URL=new URL('./assets/astribot/model.json?v=20261110sim3d',import.meta.url);
 let sharedAssets;
 let assetProgress={phase:'metadata',loaded:0,total:1,ratio:0};
 const progressListeners=new Set();
@@ -240,7 +240,7 @@ export async function createRobotView(canvas,{interactive=true,variant='hero',on
   function render(state={}){
     if(disposed||gl.isContextLost())return false;
     lastState=state;const camera=state.camera||[0,0],target=state.target||[0,0];
-    if(camera.some((v,i)=>v!==lastCamera[i])){const solved=solveRightArm(model,planarPosition(frame,camera),q);q=solved.q;fk=solved.fk;lastCamera=[...camera];}
+    if(camera.length!==lastCamera.length||camera.some((v,i)=>v!==lastCamera[i])){const solved=solveRightArm(model,planarPosition(frame,camera),q);q=solved.q;fk=solved.fk;lastCamera=[...camera];}
     resize();gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.965,.969,.975,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.disable(gl.CULL_FACE);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.useProgram(shader);
     const {eye,vp}=getViewProjection({variant,aspect:canvas.width/canvas.height,yaw,pitch,distance});
     gl.uniformMatrix4fv(uniforms.VP,false,new Float32Array(vp));gl.uniform3fv(uniforms.Eye,eye);

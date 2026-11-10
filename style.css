@@ -144,6 +144,8 @@ html[lang=zh-CN] .hero-title-line { display: inline; }
 .segmented > button.active { color: var(--ink); background: #fff; box-shadow: 0 1px 4px #00000008; }
 .lab-grid { display: grid; grid-template-columns: 245px minmax(0,1fr); gap: 22px; align-items: start; }
 .lab-settings { border: 1px solid var(--line); border-radius: var(--panel-radius); background: #fff; padding: 22px 19px; }
+.motion-settings { grid-column: 1/-1; }
+.motion-description { margin: -8px 0 20px; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .lab-workspace { min-width: 0; }
 .settings-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 23px; gap: 8px; }
 .settings-heading h3 { font-size: 16px; }
